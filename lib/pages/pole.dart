@@ -1,6 +1,4 @@
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
@@ -26,6 +24,8 @@ final int dirTreeEnd = 0xffffffff;
 
 final int poleCACHEBUFSIZE =
     4096; //a presumably reasonable size for the read cache
+
+//-------------------------------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------------------------------
 int _readU16(Uint8List buffer, int offset) {
@@ -1608,6 +1608,9 @@ class StorageIO {
     //await raf.setPosition(0);
     //int bytesRead = await raf.readInto(buffer1);
 
+    // print(
+    //     'StorageIO::loadBigBlocks() - filesize: $filesize, blocks.size: ${blocks.length}, data.size: ${data.length} , maxlen: $maxlen');
+
     for (int i = 0; (i < blocks.length) && (bytes < maxlen); i++) {
       int block = blocks[i];
       int pos = bbat.blockSize * (block + 1);
@@ -1621,19 +1624,21 @@ class StorageIO {
       // res = await raf.readInto(buffer.sublist(bytes, bytes + p));
 
       // print(
-      //     'StorageIO::loadBigBlocks() - [$i] [$res] block: $block, pos: $pos, bytes: $bytes, p: $p,  bbat.blockSize: ${bbat.blockSize}');
+      //     'StorageIO::loadBigBlocks() - [$i] block: $block, pos: $pos, bytes: $bytes, p: $p,  bbat.blockSize: ${bbat.blockSize}');
 
       Uint8List buffer = Uint8List(p);
       await raf.setPosition(pos);
       res = await raf.readInto(buffer); // or filesize
+
+      // print(
+      //     'StorageIO::loadBigBlocks() - [$i] [$res] block: $block, bytes: $bytes, pos: $pos, p: $p,  bbat.blockSize: ${bbat.blockSize}, buffer: ${buffer}');
 
       data.setRange(bytes, bytes + p, buffer);
 
       // // print(
       // //     'StorageIO::loadBigBlocks() - [$i] [$res] block: $block, pos: $pos, bytes: $bytes, p: $p,  bbat.blockSize: ${bbat.blockSize}');
 
-      // print(
-      //     'StorageIO::loadBigBlocks() - [$i] block: $block, pos: $pos, p: $p, bytes: $bytes');
+      // print('StorageIO::loadBigBlocks() - [$i] data: $data');
 
       // // print(
       // //     'StorageIO::loadBigBlocks() - [$i] block: $block, pos: $pos, p: $p, bytes: $bytes, buffer: ${buffer[0]}, ${buffer[1]}, ${buffer[2]}, ${buffer[3]}, ${buffer[4]}, ${buffer[5]}, ${buffer[6]}, ${buffer[7]}');
@@ -1650,13 +1655,15 @@ class StorageIO {
     // wraps call for loadBigBlocks
     List<int> blocks = [];
     //blocks.length = 1;
-    blocks.add(0);
-    blocks[0] = block;
+    //blocks.add(0);
+    //blocks[0] = block;
+    blocks.add(block);
     return await loadBigBlocks(blocks, data, maxlen);
   }
 
   // return number of bytes which has been read
-  int loadSmallBlocks(List<int> blocks, Uint8List? data, int maxlen) {
+  Future<int> loadSmallBlocks(
+      List<int> blocks, Uint8List? data, int maxlen) async {
     // sentinel
     if (data == null) return 0;
     if (blocks.isEmpty) return 0;
@@ -1664,6 +1671,7 @@ class StorageIO {
 
     // our own local buffer
     Uint8List buf = Uint8List(bbat.blockSize);
+    // print('StorageIO::loadSmallBlocks() - buf.size(): ${buf.length}');
 
     // read small block one by one
     int bytes = 0;
@@ -1675,7 +1683,7 @@ class StorageIO {
       int bbindex = pos ~/ bbat.blockSize;
       if (bbindex >= sbBlocks.length) break;
 
-      loadBigBlock(sbBlocks[bbindex], buf, bbat.blockSize);
+      await loadBigBlock(sbBlocks[bbindex], buf, bbat.blockSize);
 
       // copy the data
       int offset = pos % bbat.blockSize;
@@ -1683,23 +1691,25 @@ class StorageIO {
           ? maxlen - bytes
           : bbat.blockSize - offset;
       p = (sbat.blockSize < p) ? sbat.blockSize : p;
+
+      //print('StorageIO::loadSmallBlocks() - p: $p, offset: $offset, buf: $buf');
       data.setRange(bytes, bytes + p, buf, offset);
+
+      //print('StorageIO::loadSmallBlocks() - data: $data');
       bytes += p;
     }
 
     return bytes;
   }
 
-  int loadSmallBlock(int block, Uint8List? data, int maxlen) {
+  Future<int> loadSmallBlock(int block, Uint8List? data, int maxlen) async {
     // sentinel
     if (data == null) return 0;
 
     // wraps call for loadSmallBlocks
     List<int> blockList = [];
-    //blockList.length = 1;
-    blockList.add(0);
-    blockList[0] = block;
-    return loadSmallBlocks(blockList, data, maxlen);
+    blockList.add(block);
+    return await loadSmallBlocks(blockList, data, maxlen);
   }
 
   Future<int> saveBigBlocks(
@@ -1992,13 +2002,13 @@ class StreamIO {
     return data;
   }
 
-  int read(Uint8List data, int maxlen) {
-    int bytes = read3(tell(), data, maxlen);
+  Future<int> read(Uint8List data, int maxlen) async {
+    int bytes = await read3(tell(), data, maxlen);
     position += bytes;
     return bytes;
   }
 
-  int read3(int pos, Uint8List data, int maxlen) {
+  Future<int> read3(int pos, Uint8List data, int maxlen) async {
     // sanity checks
     if (maxlen == 0) return 0;
 
@@ -2010,7 +2020,9 @@ class StreamIO {
       maxlen = entry.size - pos;
     }
 
+    print('StreamIO::read3() - maxlen: $maxlen');
     if (entry.size < io.header.threshold) {
+      print('StreamIO::read3() - small file');
       // small file
       int index = pos ~/ io.sbat.blockSize;
 
@@ -2022,7 +2034,7 @@ class StreamIO {
       while (totalbytes < maxlen) {
         if (index >= blocks.length) break;
 
-        io.loadSmallBlock(blocks[index], buf, io.bbat.blockSize);
+        await io.loadSmallBlock(blocks[index], buf, io.bbat.blockSize);
         int count = io.sbat.blockSize - offset;
 
         if (count > maxlen - totalbytes) count = maxlen - totalbytes;
@@ -2032,6 +2044,7 @@ class StreamIO {
         index++;
       }
     } else {
+      print('StreamIO::read3() -big file');
       // big file
       int index = pos ~/ io.bbat.blockSize;
 
@@ -2043,7 +2056,7 @@ class StreamIO {
       while (totalbytes < maxlen) {
         if (index >= blocks.length) break;
 
-        io.loadBigBlock(blocks[index], buf, io.bbat.blockSize);
+        await io.loadBigBlock(blocks[index], buf, io.bbat.blockSize);
         int count = io.bbat.blockSize - offset;
 
         if (count > maxlen - totalbytes) {
@@ -2143,7 +2156,7 @@ class StreamIO {
 
   Future<void> flush() async => io.flush();
 
-  void updateCache() {
+  Future<void> updateCache() async {
     DirEntry? entry = io.dirtree.entry(entryIdx);
     if (entry == null) return;
 
@@ -2153,7 +2166,7 @@ class StreamIO {
     if (cachePos + bytes > entry.size) {
       bytes = entry.size - cachePos;
     }
-    cacheSize = read3(cachePos, cacheData, bytes);
+    cacheSize = await read3(cachePos, cacheData, bytes);
   }
 
   void debug() {
@@ -2168,8 +2181,8 @@ class Stream {
   final Storage _storage;
   final String _name;
   late StreamIO _io;
-  int _position = 0;
-  int _size = 0;
+  //int _position = 0;
+  //int _size = 0;
 
   Stream(this._storage, this._name, {bool create = false, int streamSize = 0}) {
     // Find or create directory entry
@@ -2184,7 +2197,7 @@ class Stream {
     // _size = entry.size;
 
     _io = _storage._io.streamIO(_name, create, streamSize)!;
-    _size = _io.entry.size;
+    //_size = _io.entry.size;
   }
 
   // Stream(Storage storage, String name, { bool bCreate=false, int streamSize = 0 })
@@ -2205,7 +2218,7 @@ class Stream {
   /// Sets the stream size.
   Future<void> setSize(int newSize) async {
     await _io.setSize(newSize);
-    _size = newSize;
+    //_size = newSize;
   }
 
   /// Returns the current read/write position.
@@ -2214,32 +2227,32 @@ class Stream {
   /// Sets the read/write position.
   Future<void> seek(int pos) async {
     await _io.seek(pos);
-    _position = pos;
+    //_position = pos;
   }
 
   /// Reads a byte.
   Future<int> getch() async {
     int result = await _io.getch();
     if (result >= 0) {
-      _position++;
+      //_position++;
     }
     return result;
   }
 
   /// Reads a block of data.
   Future<int> read(Uint8List data, int maxlen) async {
-    int result = _io.read(data, maxlen);
-    _position += result;
+    int result = await _io.read(data, maxlen);
+    //_position += result;
     return result;
   }
 
   /// Writes a block of data.
   Future<int> write(Uint8List? data, int len) async {
     int result = _io.write(data, len);
-    _position += result;
-    if (_position > _size) {
-      _size = _position;
-    }
+    // _position += result;
+    // if (_position > _size) {
+    //   _size = _position;
+    // }
     return result;
   }
 

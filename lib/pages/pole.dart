@@ -2020,9 +2020,9 @@ class StreamIO {
       maxlen = entry.size - pos;
     }
 
-    print('StreamIO::read3() - maxlen: $maxlen');
+    //print('StreamIO::read3() - maxlen: $maxlen');
     if (entry.size < io.header.threshold) {
-      print('StreamIO::read3() - small file');
+      //print('StreamIO::read3() - small file');
       // small file
       int index = pos ~/ io.sbat.blockSize;
 
@@ -2044,7 +2044,7 @@ class StreamIO {
         index++;
       }
     } else {
-      print('StreamIO::read3() -big file');
+      //print('StreamIO::read3() -big file');
       // big file
       int index = pos ~/ io.bbat.blockSize;
 

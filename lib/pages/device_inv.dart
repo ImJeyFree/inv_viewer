@@ -884,7 +884,90 @@ class ParameterSpec {
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
   Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
-    return {};
+    parmGrpList.clear();
+    nTotGroup = 0;
+
+    if (buffer.isNotEmpty) {
+      nTotGroup = _readU32(buffer, 0);
+      if (nTotGroup > 0) {
+        final infoButter = Uint8List(groupInfoSize);
+        final parmButter = Uint8List(parameterSize);
+
+        //print('ParameterSpec::parseData() - nTotGroup: $nTotGroup');
+
+        for (int i = 0; i < nTotGroup; i++) {
+          final groupInfoPath = '/Parameter Spec/Group-$i/Group Info';
+          final parameterPath = '/Parameter Spec/Group-$i/Parameter';
+
+          //print('ParameterSpec::parseData() - groupInfoPath: $groupInfoPath');
+          //print('ParameterSpec::parseData() - parameterPath: $parameterPath');
+
+          Stream groupInfoStream = Stream(storage, groupInfoPath);
+          Stream parameterStream = Stream(storage, parameterPath);
+
+          //Map<String, dynamic> grpParamMap = {};
+          Map<String, dynamic> paramMap = {};
+          int nTotParm = 0;
+
+          if (!groupInfoStream.fail() && !parameterStream.fail()) {
+            if (await groupInfoStream.read(infoButter, groupInfoSize) > 0) {
+              //Map<String, dynamic> map = {
+              paramMap = {
+                'nGrpNum': _readU32(infoButter, 0),
+                'strGrpName': _readString(infoButter, 4, 10), // 10+2
+                'nAttribute': _readU32(infoButter, 16),
+                'nTotParm': _readU32(infoButter, 20),
+              };
+              nTotParm = paramMap['nTotParm'];
+              //grpParamMap['GrpInfo'] = map;
+              // grpParamMap.addAll({
+              //   'GrpInfo': map,
+              // });
+            }
+            //print('ParameterSpec::parseData() - nTotParm: $nTotParm');
+            //print('paramMap -$paramMap');
+
+            List<Map<String, dynamic>> parmTypeList = [];
+            for (int nParmCnt = 0; nParmCnt < nTotParm; nParmCnt++) {
+              if (await parameterStream.read(parmButter, parameterSize) > 0) {
+                Map<String, dynamic> typeMap = {
+                  'nCodeNum': _readU32(parmButter, 0),
+                  'strNameHz': _readString(parmButter, 4, 30), //
+                  'strNameRpm': _readString(parmButter, 34, 30), //
+                  'nDefault': _readU32(parmButter, 64),
+                  'nMax': _readU32(parmButter, 68),
+                  'nMin': _readU32(parmButter, 72),
+                  'nDataType': _readU32(parmButter, 76),
+                  'nPointMsg': _readU32(parmButter, 80),
+                  'strUnit': _readString(parmButter, 84, 10), // 10+2
+                  'nAttribute': _readU32(parmButter, 96)
+                };
+                parmTypeList.add(typeMap);
+              }
+            }
+            //grpParamMap['pParmType'] = parmTypeList;
+            // grpParamMap.addAll({
+            //   'pParmType': parmTypeList,
+            // });
+
+            Map<String, dynamic> grpParamMap = {
+              'GrpInfo': paramMap,
+              'pParmType': parmTypeList
+            };
+            parmGrpList.add(grpParamMap);
+          }
+        }
+      }
+    }
+
+    //print('PATH: $path');
+    //print(' - nTotGroup: $nTotGroup');
+    //print(' - pParmGrp: $parmGrpList');
+
+    return {
+      'nTotGroup': nTotGroup,
+      'pParmGrp': parmGrpList,
+    };
   }
 }
 

@@ -32,10 +32,10 @@ class _FileContentPageState extends State<FileContentPage> {
       //List<String> result = await _visit(0, storage, '/');
       //List<String> result = await readDeviceSpec(storage);
       //List<String> result = await readIoSpec(storage);
-      List<String> result = await readTripSpec(storage);
+      //List<String> result = await readTripSpec(storage);
       //List<String> result = await readMsgSpec(storage);
       //List<String> result = await readCommonSpec(storage);
-
+      List<String> result = await readParameterSpec(storage);
       //List<String> result = await readInitOrder(storage);
 
       setState(() {
@@ -166,7 +166,7 @@ class _FileContentPageState extends State<FileContentPage> {
       MsgSpec spec = MsgSpec(storage);
       final res = await spec.parse();
 
-      result.add('Parsed TripSpec:');
+      result.add('Parsed readMsgSpec:');
       result.add('  nTotalMsg: ${res['nTotalMsg']}, ${spec.nTotalMsg}');
       result.add('  pMsgInfo: ${res['pMsgInfo']}');
     } catch (e) {
@@ -181,10 +181,25 @@ class _FileContentPageState extends State<FileContentPage> {
       CommonSpec spec = CommonSpec(storage);
       final res = await spec.parse();
 
-      result.add('Parsed TripSpec:');
+      result.add('Parsed CommonSpec:');
       result
           .add('  nTotCommonNo: ${res['nTotCommonNo']}, ${spec.nTotCommonNo}');
       result.add('  pCommonInfo: ${res['pCommonInfo']}');
+    } catch (e) {
+      result.add('readIoInfo error: $e');
+    }
+    return result;
+  }
+
+  Future<List<String>> readParameterSpec(Storage storage) async {
+    List<String> result = [];
+    try {
+      ParameterSpec spec = ParameterSpec(storage);
+      final res = await spec.parse();
+
+      result.add('Parsed ParameterSpec:');
+      result.add('  nTotGroup: ${res['nTotGroup']}, ${spec.nTotGroup}');
+      result.add('  pParmGrp: ${res['pParmGrp']}');
     } catch (e) {
       result.add('readIoInfo error: $e');
     }
@@ -197,7 +212,7 @@ class _FileContentPageState extends State<FileContentPage> {
       InitOrder spec = InitOrder(storage);
       final res = await spec.parse();
 
-      result.add('Parsed TripSpec:');
+      result.add('Parsed InitOrder:');
       result
           .add('  nTotInitOder: ${res['nTotInitOder']}, ${spec.nTotInitOder}');
       result.add('  pOrderAddr: ${res['pOrderAddr']}');

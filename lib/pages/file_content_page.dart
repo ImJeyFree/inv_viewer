@@ -80,23 +80,23 @@ class _FileContentPageState extends State<FileContentPage> {
     final res = await spec.parse();
 
     result.add('Parsed DeviceSpec:');
-    result.add('  DataFileVer: ${res['strDataFileVer']}');
-    result.add('  InvModelNo: ${res['nInvModelNo']}');
-    result.add('  InvModelName: ${res['strInvModelName']}');
-    result.add('  InvSWVer: ${res['strInvSWVer']}');
-    result.add('  InvCodeVer: ${res['strInvCodeVer']}');
-    result.add('  CommOffset: ${res['nCommOffset']}');
-    result.add('  TotalDiagNum: ${res['nTotalDiagNum']}');
-    result.add('  ModelNoCommAddr: ${res['nModelNoCommAddr']}');
-    result.add('  CodeVerCommAddr: ${res['nCodeVerCommAddr']}');
-    result.add('  MotorStatusCommAddr: ${res['nMotorStatusCommAddr']}');
-    result.add('  InvStatusCommAddr: ${res['nInvStatusCommAddr']}');
-    result.add('  InvControlCommAddr: ${res['nInvControlCommAddr']}');
+    result.add('  strDataFileVer: ${res['strDataFileVer']}');
+    result.add('  nInvModelNo: ${res['nInvModelNo']}');
+    result.add('  strInvModelName: ${res['strInvModelName']}');
+    result.add('  strInvSWVer: ${res['strInvSWVer']}');
+    result.add('  strInvCodeVer: ${res['strInvCodeVer']}');
+    result.add('  nCommOffset: ${res['nCommOffset']}');
+    result.add('  nTotalDiagNum: ${res['nTotalDiagNum']}');
+    result.add('  nModelNoCommAddr: ${res['nModelNoCommAddr']}');
+    result.add('  nCodeVerCommAddr: ${res['nCodeVerCommAddr']}');
+    result.add('  nMotorStatusCommAddr: ${res['nMotorStatusCommAddr']}');
+    result.add('  nInvStatusCommAddr: ${res['nInvStatusCommAddr']}');
+    result.add('  nInvControlCommAddr: ${res['nInvControlCommAddr']}');
     result.add('  ParameterSaveCommAddr: ${res['nParameterSaveCommAddr']}');
 
-    result.add('  diagNumber: ${res['diagNumber']}');
+    result.add('  pDiagNum: ${res['pDiagNum']}');
     if (spec.nTotalDiagNum > 0) {
-      result.add('  diagNumber: ${spec.diagNumberList}');
+      result.add('  pDiagNum: ${spec.diagNumList}');
     }
 
     return result;
@@ -109,20 +109,20 @@ class _FileContentPageState extends State<FileContentPage> {
       final res = await spec.parse();
 
       result.add('Parsed IoSpec:');
-      result.add('  TotalInput: ${res['nTotalInput']}, ${spec.nTotalInput}');
-      result.add('  NormalInput: ${res['nNormalInput']}');
-      result.add('  TotalInputFuncTitle: ${res['nTotalInputFuncTitle']}');
-      result.add('  TotalOutput: ${res['nTotalOutput']}');
-      result.add('  NormalOutput: ${res['nNormalOutput']}');
-      result.add('  TotalOutputFuncTitle: ${res['nTotalOutputFuncTitle']}');
-      result.add('  AddInputStatus: ${res['nAddInputStatus']}');
-      result.add('  AddOutputStatus: ${res['nAddOutputStatus']}');
+      result.add('  nTotalInput: ${res['nTotalInput']}, ${spec.nTotalInput}');
+      result.add('  nNormalInput: ${res['nNormalInput']}');
+      result.add('  nTotalInputFuncTitle: ${res['nTotalInputFuncTitle']}');
+      result.add('  nTotalOutput: ${res['nTotalOutput']}');
+      result.add('  nNormalOutput: ${res['nNormalOutput']}');
+      result.add('  nTotalOutputFuncTitle: ${res['nTotalOutputFuncTitle']}');
+      result.add('  nAddInputStatus: ${res['nAddInputStatus']}');
+      result.add('  nAddOutputStatus: ${res['nAddOutputStatus']}');
 
-      result.add('  inputTerminalInfoList: ${res['inputTerminalInfoList']}');
-      result.add('  outputTerminalInfoList: ${res['outputTerminalInfoList']}');
+      result.add('  pInputTermInfo: ${res['pInputTermInfo']}');
+      result.add('  pOutputTermInfo: ${res['pOutputTermInfo']}');
 
-      result.add('  inputFuncMsgTitleList: ${res['inputFuncMsgTitleList']}');
-      result.add('  outputFuncMsgTitleList: ${res['outputFuncMsgTitleList']}');
+      result.add('  pInputFuncMsg: ${res['pOutputTermInfo']}');
+      result.add('  pOutputFuncMsgTitle: ${res['pOutputFuncMsgTitle']}');
     } catch (e) {
       result.add('readIoInfo error: $e');
     }
@@ -146,14 +146,14 @@ class _FileContentPageState extends State<FileContentPage> {
       result.add('  nCurTotalWarn: ${res['nCurTotalWarn']}');
       result.add('  nTotalWarnInfo: ${res['nTotalWarnInfo']}');
 
-      result.add('  tripNameList: ${res['tripNameList']}');
-      result.add('  warnNameList: ${res['warnNameList']}');
+      result.add('  pTripName: ${res['pTripName']}');
+      result.add('  pWarnName: ${res['pWarnName']}');
 
-      result.add('  tripAddrList: ${res['tripAddrList']}');
-      result.add('  warnAddrList: ${res['warnAddrList']}');
+      result.add('  pTripAddr: ${res['pTripAddr']}');
+      result.add('  pWarnAddr: ${res['pWarnAddr']}');
 
-      result.add('  tripInfoDataList: ${res['tripInfoDataList']}');
-      result.add('  warnInfoDataList: ${res['warnInfoDataList']}');
+      result.add('  pTripInfoData: ${res['pTripInfoData']}');
+      result.add('  pWarnInfoData: ${res['pWarnInfoData']}');
     } catch (e) {
       result.add('readIoInfo error: $e');
     }

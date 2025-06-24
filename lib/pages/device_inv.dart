@@ -18,25 +18,25 @@ const int dmdfSmallSize = 10; // DMDF_SMALL_SIZE
 //=================================================================================================
 // for inv
 //-------------------------------------------------------------------------------------------------
-const String defPathDeviceInfo = "/Device Spec/Device Info";
-const String defPathDiagNumber = "/Device Spec/Diag Number";
-const String defPathIoInfo = "/IO Spec/IO Info";
-const String defPathTerminalInfo = "/IO Spec/Terminal Info";
-const String defPathIoFuncMsgTitle = "/IO Spec/IO Func Msg Title";
-const String defPathTripInfo = "/Trip Spec/Trip Info";
-const String defPathTripName = "/Trip Spec/Trip Name";
-const String defPathCommAddr = "/Trip Spec/Comm Addr";
-const String defPathTripInfoData = "/Trip Spec/Trip Info Data";
-const String defPathTotalMessage = "/Message Spec/Total Message";
-const String defPathMsgTitle = "/Message Spec/Msg Title";
-const String defPathMsgTitleNum = "/Message Spec/Msg Title Num";
-const String defPathCommonInfo = "/Common Spec/Common Info";
-const String defPathTotalCommon = "/Common Spec/Total Common";
-const String defPathTotalGroup = "/Parameter Spec/Total Group";
-const String defPathParameter = "/Parameter Spec/Group-%1/Parameter";
-const String defPathGroupInfo = "/Parameter Spec/Group-%1/Group Info";
-const String defPathTotalInitOrder = "/Init Order/Total Init Order";
-const String defPathInitOrderParaAddr = "/Init Order/Init Order Para Addr";
+// const String defPathDeviceInfo = "/Device Spec/Device Info";
+// const String defPathDiagNumber = "/Device Spec/Diag Number";
+// const String defPathIoInfo = "/IO Spec/IO Info";
+// const String defPathTerminalInfo = "/IO Spec/Terminal Info";
+// const String defPathIoFuncMsgTitle = "/IO Spec/IO Func Msg Title";
+// const String defPathTripInfo = "/Trip Spec/Trip Info";
+// const String defPathTripName = "/Trip Spec/Trip Name";
+// const String defPathCommAddr = "/Trip Spec/Comm Addr";
+// const String defPathTripInfoData = "/Trip Spec/Trip Info Data";
+// const String defPathTotalMessage = "/Message Spec/Total Message";
+// const String defPathMsgTitle = "/Message Spec/Msg Title";
+// const String defPathMsgTitleNum = "/Message Spec/Msg Title Num";
+// const String defPathCommonInfo = "/Common Spec/Common Info";
+// const String defPathTotalCommon = "/Common Spec/Total Common";
+// const String defPathTotalGroup = "/Parameter Spec/Total Group";
+// const String defPathParameter = "/Parameter Spec/Group-%1/Parameter";
+// const String defPathGroupInfo = "/Parameter Spec/Group-%1/Group Info";
+// const String defPathTotalInitOrder = "/Init Order/Total Init Order";
+// const String defPathInitOrderParaAddr = "/Init Order/Init Order Para Addr";
 
 //=================================================================================================
 int _readU16(Uint8List buffer, int offset) {
@@ -120,42 +120,6 @@ void _writeString(Uint8List buffer, int offset, String value, int length) {
   }
 }
 
-//=================================================================================================
-// typedef struct _DEVICE_INFO { ... } DEVICE_INFO
-//-------------------------------------------------------------------------------------------------
-// 10 + 4 + 30 + 10 + 10 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 = 96 bytes, padding 때문에 100 bytes
-// /Device Spec/Device Info (100)
-//const int deviceInfoSize = 100;
-
-// final class DeviceInfo extends Struct {
-//   @Array(10) // Fixed-size array of 10 bytes
-//   external Array<Uint8> strDataFileVer;
-//   @Int32()
-//   external int nInvModelNo;
-//   @Array(30) // Fixed-size array of 30 bytes
-//   external Array<Uint8> strInvModelName;
-//   @Array(10) // Fixed-size array of 10 bytes
-//   external Array<Uint8> strInvSWVer;
-//   @Array(10) // Fixed-size array of 10 bytes
-//   external Array<Uint8> strInvCodeVer;
-
-//   @Int32()
-//   external int nCommOffset;
-//   @Int32()
-//   external int nTotalDiagNum;
-//   @Int32() // 모델번호 가져오기 주소
-//   external int nModelNoCommAddr;
-//   @Int32() // Code Version 가져오기 주소
-//   external int nCodeVerCommAddr;
-//   @Int32() // Moter Status 가져오기 주소
-//   external int nMotorStatusCommAddr;
-//   @Int32() //인버터 상태 가져오기 주소
-//   external int nInvStatusCommAddr;
-//   @Int32()
-//   external int nInvControlCommAddr;
-//   @Int32()
-//   external int nParameterSaveCommAddr;
-
 class DeviceSpec {
   //===============================================================================================
   String strDataFileVer = ''; // Fixed-size array of 10 bytes
@@ -174,7 +138,7 @@ class DeviceSpec {
   int nParameterSaveCommAddr = 0;
   //-----------------------------------------------------------------------------------------------
   // Diag Number list
-  List<int> diagNumberList = [];
+  List<int> diagNumList = [];
   //-----------------------------------------------------------------------------------------------
   Storage storage;
   //===============================================================================================
@@ -260,7 +224,7 @@ class DeviceSpec {
         final temp = Uint8List(diagNumberSize); // 4:sizeof(int)
         for (int i = 0; i < count; i++) {
           if (await stream.read(temp, diagNumberSize) > 0) {
-            diagNumberList.add(_readU32(temp, 0));
+            diagNumList.add(_readU32(temp, 0));
           }
         }
       }
@@ -274,7 +238,7 @@ class DeviceSpec {
     print(' - strInvCodeVer: $strInvCodeVer');
     print(' - nCommOffset: $nCommOffset');
     print(' - nTotalDiagNum: $nTotalDiagNum');
-    print('   - diagNumber: $diagNumberList');
+    print('   - diagNumber: $diagNumList');
     print(' - nModelNoCommAddr: $nModelNoCommAddr');
     print(' - nCodeVerCommAddr: $nCodeVerCommAddr');
     print(' - nMotorStatusCommAddr: $nMotorStatusCommAddr');
@@ -296,7 +260,7 @@ class DeviceSpec {
       'nInvStatusCommAddr': nInvStatusCommAddr,
       'nInvControlCommAddr': nInvControlCommAddr,
       'nParameterSaveCommAddr': nParameterSaveCommAddr,
-      'diagNumber': diagNumberList,
+      'pDiagNum': diagNumList,
     };
   }
 }
@@ -340,12 +304,12 @@ class IoSpec {
   int nAddOutputStatus = 0; //출력 단자 상태 정보 동신주소
   //-----------------------------------------------------------------------------------------------
   // Terminal Info
-  List<Map<String, dynamic>> inputTerminalInfoList = [];
+  List<Map<String, dynamic>> inputTermInfoList = [];
   List<Map<String, dynamic>> outputTerminalInfoList = [];
   //-----------------------------------------------------------------------------------------------
   // IO Func Msg Title
-  List<String> inputFuncMsgTitleList = [];
-  List<String> outputFuncMsgTitleList = [];
+  List<String> inputFuncMsgList = [];
+  List<String> outputFuncMsgList = [];
   //-----------------------------------------------------------------------------------------------
   //int steamSize = 0;
   Storage storage;
@@ -392,10 +356,10 @@ class IoSpec {
       return value;
     }
 
-    inputTerminalInfoList.clear();
+    inputTermInfoList.clear();
     outputTerminalInfoList.clear();
-    inputFuncMsgTitleList.clear();
-    outputFuncMsgTitleList.clear();
+    inputFuncMsgList.clear();
+    outputFuncMsgList.clear();
 
     if (buffer.isNotEmpty) {
       nTotalInput = readInt32();
@@ -418,7 +382,7 @@ class IoSpec {
                 'strName': _readString(temp, 0, 30),
                 'nCommAddr': _readU32(temp, 32)
               };
-              inputTerminalInfoList.add(map);
+              inputTermInfoList.add(map);
             }
           }
           for (int i = 0; i < nTotalOutput; i++) {
@@ -440,13 +404,12 @@ class IoSpec {
           final temp = Uint8List(funcMsgTitleSize); // 30
           for (int i = 0; i < nTotalInputFuncTitle; i++) {
             if (await stream.read(temp, funcMsgTitleSize) > 0) {
-              inputFuncMsgTitleList.add(_readString(temp, 0, funcMsgTitleSize));
+              inputFuncMsgList.add(_readString(temp, 0, funcMsgTitleSize));
             }
           }
           for (int i = 0; i < nTotalOutputFuncTitle; i++) {
             if (await stream.read(temp, funcMsgTitleSize) > 0) {
-              outputFuncMsgTitleList
-                  .add(_readString(temp, 0, funcMsgTitleSize));
+              outputFuncMsgList.add(_readString(temp, 0, funcMsgTitleSize));
             }
           }
         }
@@ -462,10 +425,10 @@ class IoSpec {
     print(' - nTotalOutputFuncTitle: $nTotalOutputFuncTitle');
     print(' - nAddInputStatus: $nAddInputStatus');
     print(' - nAddOutputStatus: $nAddOutputStatus');
-    print('   - inputTerminalInfoList: $inputTerminalInfoList');
-    print('   - outputTerminalInfoList: $outputTerminalInfoList');
-    print('   - inputFuncMsgTitleList: $inputFuncMsgTitleList');
-    print('   - outputFuncMsgTitleList: $outputFuncMsgTitleList');
+    print('   - pInputTermInfo: $inputTermInfoList');
+    print('   - pOutputTermInfo: $outputTerminalInfoList');
+    print('   - inputFuncMsgTitleList: $inputFuncMsgList');
+    print('   - outputFuncMsgTitleList: $outputFuncMsgList');
 
     return {
       'nTotalInput': nTotalInput,
@@ -476,10 +439,10 @@ class IoSpec {
       'nTotalOutputFuncTitle': nTotalOutputFuncTitle,
       'nAddInputStatus': nAddInputStatus,
       'nAddOutputStatus': nAddOutputStatus,
-      'inputTerminalInfoList': inputTerminalInfoList,
-      'outputTerminalInfoList': outputTerminalInfoList,
-      'inputFuncMsgTitleList': inputFuncMsgTitleList,
-      'outputFuncMsgTitleList': outputFuncMsgTitleList,
+      'pInputTermInfo': inputTermInfoList,
+      'pOutputTermInfo': outputTerminalInfoList,
+      'pInputFuncMsg': inputFuncMsgList,
+      'pOutputFuncMsgTitle': outputFuncMsgList,
     };
   }
 }
@@ -653,12 +616,12 @@ class TripSpec {
     print(' - nFirstWarnNameAddr: $nFirstWarnNameAddr');
     print(' - nCurTotalWarn: $nCurTotalWarn');
     print(' - nTotalWarnInfo: $nTotalWarnInfo');
-    print('   - tripNameList: $tripNameList');
-    print('   - warnNameList: $warnNameList');
-    print('   - tripAddrList: $tripAddrList');
-    print('   - warnAddrList: $warnAddrList');
-    print('   - tripInfoDataList: $tripInfoDataList');
-    print('   - warnInfoDataList: $warnInfoDataList');
+    print('   - pTripName: $tripNameList');
+    print('   - pWarnName: $warnNameList');
+    print('   - pTripAddr: $tripAddrList');
+    print('   - pWarnAddr: $warnAddrList');
+    print('   - pWarnAddr: $tripInfoDataList');
+    print('   - pWarnInfoData: $warnInfoDataList');
 
     return {
       'nTotalTripName': nTotalTripName,
@@ -669,12 +632,12 @@ class TripSpec {
       'nFirstWarnNameAddr': nFirstWarnNameAddr,
       'nCurTotalWarn': nCurTotalWarn,
       'nTotalWarnInfo': nTotalWarnInfo,
-      'tripNameList': tripNameList,
-      'warnNameList': warnNameList,
-      'tripAddrList': tripAddrList,
-      'warnAddrList': warnAddrList,
-      'tripInfoDataList': tripInfoDataList,
-      'warnInfoDataList': warnInfoDataList,
+      'pTripName': tripNameList,
+      'pWarnName': warnNameList,
+      'pTripAddr': tripAddrList,
+      'pWarnAddr': warnAddrList,
+      'pTripInfoData': tripInfoDataList,
+      'pWarnInfoData': warnInfoDataList,
     };
   }
 }

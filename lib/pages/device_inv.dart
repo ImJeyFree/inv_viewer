@@ -143,21 +143,21 @@ class DeviceSpec {
       }
     }
 
-    print('PATH: $path');
-    print(' - strDataFileVer: $strDataFileVer');
-    print(' - nInvModelNo: $nInvModelNo');
-    print(' - strInvModelName: $strInvModelName');
-    print(' - strInvSWVer: $strInvSWVer');
-    print(' - strInvCodeVer: $strInvCodeVer');
-    print(' - nCommOffset: $nCommOffset');
-    print(' - nTotalDiagNum: $nTotalDiagNum');
-    print('   - diagNumber: $diagNumList');
-    print(' - nModelNoCommAddr: $nModelNoCommAddr');
-    print(' - nCodeVerCommAddr: $nCodeVerCommAddr');
-    print(' - nMotorStatusCommAddr: $nMotorStatusCommAddr');
-    print(' - nInvStatusCommAddr: $nInvStatusCommAddr');
-    print(' - nInvControlCommAddr: $nInvControlCommAddr');
-    print(' - nParameterSaveCommAddr: $nParameterSaveCommAddr');
+    // print('PATH: $path');
+    // print(' - strDataFileVer: $strDataFileVer');
+    // print(' - nInvModelNo: $nInvModelNo');
+    // print(' - strInvModelName: $strInvModelName');
+    // print(' - strInvSWVer: $strInvSWVer');
+    // print(' - strInvCodeVer: $strInvCodeVer');
+    // print(' - nCommOffset: $nCommOffset');
+    // print(' - nTotalDiagNum: $nTotalDiagNum');
+    // print('   - diagNumber: $diagNumList');
+    // print(' - nModelNoCommAddr: $nModelNoCommAddr');
+    // print(' - nCodeVerCommAddr: $nCodeVerCommAddr');
+    // print(' - nMotorStatusCommAddr: $nMotorStatusCommAddr');
+    // print(' - nInvStatusCommAddr: $nInvStatusCommAddr');
+    // print(' - nInvControlCommAddr: $nInvControlCommAddr');
+    // print(' - nParameterSaveCommAddr: $nParameterSaveCommAddr');
 
     return {
       'strDataFileVer': strDataFileVer,
@@ -306,19 +306,19 @@ class IoSpec {
       }
     }
 
-    print('PATH: $path');
-    print(' - nTotalInput: $nTotalInput');
-    print(' - nNormalInput: $nNormalInput');
-    print(' - nTotalInputFuncTitle: $nTotalInputFuncTitle');
-    print(' - nTotalOutput: $nTotalOutput');
-    print(' - nNormalOutput: $nNormalOutput');
-    print(' - nTotalOutputFuncTitle: $nTotalOutputFuncTitle');
-    print(' - nAddInputStatus: $nAddInputStatus');
-    print(' - nAddOutputStatus: $nAddOutputStatus');
-    print('   - pInputTermInfo: $inputTermInfoList');
-    print('   - pOutputTermInfo: $outputTerminalInfoList');
-    print('   - inputFuncMsgTitleList: $inputFuncMsgList');
-    print('   - outputFuncMsgTitleList: $outputFuncMsgList');
+    // print('PATH: $path');
+    // print(' - nTotalInput: $nTotalInput');
+    // print(' - nNormalInput: $nNormalInput');
+    // print(' - nTotalInputFuncTitle: $nTotalInputFuncTitle');
+    // print(' - nTotalOutput: $nTotalOutput');
+    // print(' - nNormalOutput: $nNormalOutput');
+    // print(' - nTotalOutputFuncTitle: $nTotalOutputFuncTitle');
+    // print(' - nAddInputStatus: $nAddInputStatus');
+    // print(' - nAddOutputStatus: $nAddOutputStatus');
+    // print('   - pInputTermInfo: $inputTermInfoList');
+    // print('   - pOutputTermInfo: $outputTerminalInfoList');
+    // print('   - inputFuncMsgTitleList: $inputFuncMsgList');
+    // print('   - outputFuncMsgTitleList: $outputFuncMsgList');
 
     return {
       'nTotalInput': nTotalInput,
@@ -499,21 +499,21 @@ class TripSpec {
       }
     }
 
-    print('PATH: $path');
-    print(' - nTotalTripName: $nTotalTripName');
-    print(' - nFirstTripNameAddr: $nFirstTripNameAddr');
-    print(' - nCurTotalTrip: $nCurTotalTrip');
-    print(' - nTotalTripInfo: $nTotalTripInfo');
-    print(' - nTotalWarnName: $nTotalWarnName');
-    print(' - nFirstWarnNameAddr: $nFirstWarnNameAddr');
-    print(' - nCurTotalWarn: $nCurTotalWarn');
-    print(' - nTotalWarnInfo: $nTotalWarnInfo');
-    print('   - pTripName: $tripNameList');
-    print('   - pWarnName: $warnNameList');
-    print('   - pTripAddr: $tripAddrList');
-    print('   - pWarnAddr: $warnAddrList');
-    print('   - pWarnAddr: $tripInfoDataList');
-    print('   - pWarnInfoData: $warnInfoDataList');
+    // print('PATH: $path');
+    // print(' - nTotalTripName: $nTotalTripName');
+    // print(' - nFirstTripNameAddr: $nFirstTripNameAddr');
+    // print(' - nCurTotalTrip: $nCurTotalTrip');
+    // print(' - nTotalTripInfo: $nTotalTripInfo');
+    // print(' - nTotalWarnName: $nTotalWarnName');
+    // print(' - nFirstWarnNameAddr: $nFirstWarnNameAddr');
+    // print(' - nCurTotalWarn: $nCurTotalWarn');
+    // print(' - nTotalWarnInfo: $nTotalWarnInfo');
+    // print('   - pTripName: $tripNameList');
+    // print('   - pWarnName: $warnNameList');
+    // print('   - pTripAddr: $tripAddrList');
+    // print('   - pWarnAddr: $warnAddrList');
+    // print('   - pWarnAddr: $tripInfoDataList');
+    // print('   - pWarnInfoData: $warnInfoDataList');
 
     return {
       'nTotalTripName': nTotalTripName,
@@ -613,9 +613,9 @@ class MsgSpec {
       }
     }
 
-    print('PATH: $path');
-    print(' - nTotalMsg: $nTotalMsg');
-    print(' - pMsgInfo: $msgInfoList');
+    // print('PATH: $path');
+    // print(' - nTotalMsg: $nTotalMsg');
+    // print(' - pMsgInfo: $msgInfoList');
 
     return {
       'nTotalMsg': nTotalMsg,
@@ -691,9 +691,9 @@ class CommonSpec {
       }
     }
 
-    print('PATH: $path');
-    print(' - nTotCommonNo: $nTotCommonNo');
-    print(' - pCommonInfo: $commonInfoList');
+    // print('PATH: $path');
+    // print(' - nTotCommonNo: $nTotCommonNo');
+    // print(' - pCommonInfo: $commonInfoList');
 
     return {
       'nTotCommonNo': nTotCommonNo,
@@ -891,8 +891,8 @@ class InitOrder {
       }
     }
 
-    print('PATH: $path');
-    print(' - nTotInitOder: $nTotInitOder');
+    // print('PATH: $path');
+    // print(' - nTotInitOder: $nTotInitOder');
 
     return {
       'nTotInitOder': nTotInitOder,

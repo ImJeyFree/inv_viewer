@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'pole.dart';
 import 'device_inv.dart';
 
@@ -17,39 +18,97 @@ class _FileContentPageState extends State<FileContentPage> {
   List<String> entries = [];
   bool loading = true;
   String? error;
+  Map<String, dynamic>? invData;
 
   @override
   void initState() {
     super.initState();
-    _loadEntries();
+    _loadFile();
   }
 
-  Future<void> _loadEntries() async {
+  Future<void> _loadFile() async {
     try {
+      setState(() {
+        loading = true;
+        error = null;
+      });
+
       Storage storage = Storage(fileName: widget.fileName);
       bool res = await storage.open();
       if (!res) throw Exception('Storage open failed');
-      //List<String> result = await _visit(0, storage, '/');
-      //List<String> result = await readDeviceSpec(storage);
-      //List<String> result = await readIoSpec(storage);
-      //List<String> result = await readTripSpec(storage);
-      //List<String> result = await readMsgSpec(storage);
-      //List<String> result = await readCommonSpec(storage);
-      //List<String> result = await readParameterSpec(storage);
-      //List<String> result = await readInitOrder(storage);
 
-      List<String> result = await readINV(storage);
+      // INV 파일인지 확인
+      if (widget.fileName.toLowerCase().endsWith('.inv')) {
+        invData = await parseINVData(storage);
+        entries = await readINV(storage);
+      } else {
+        entries = await _visit(0, storage, '');
+      }
 
       setState(() {
-        entries = result;
         loading = false;
       });
     } catch (e) {
       setState(() {
-        error = e.toString();
         loading = false;
+        error = e.toString();
       });
     }
+  }
+
+  Future<Map<String, dynamic>> parseINVData(Storage storage) async {
+    Map<String, dynamic> result = {};
+
+    try {
+      DeviceSpec deviceSpec = DeviceSpec(storage);
+      result['deviceSpec'] = await deviceSpec.parse();
+    } catch (e) {
+      result['deviceSpec'] = {'error': e.toString()};
+    }
+
+    try {
+      IoSpec ioSpec = IoSpec(storage);
+      result['ioSpec'] = await ioSpec.parse();
+    } catch (e) {
+      result['ioSpec'] = {'error': e.toString()};
+    }
+
+    try {
+      TripSpec tripSpec = TripSpec(storage);
+      result['tripSpec'] = await tripSpec.parse();
+    } catch (e) {
+      result['tripSpec'] = {'error': e.toString()};
+    }
+
+    try {
+      MsgSpec msgSpec = MsgSpec(storage);
+      result['msgSpec'] = await msgSpec.parse();
+    } catch (e) {
+      result['msgSpec'] = {'error': e.toString()};
+    }
+
+    try {
+      CommonSpec commonSpec = CommonSpec(storage);
+      result['commonSpec'] = await commonSpec.parse();
+    } catch (e) {
+      result['commonSpec'] = {'error': e.toString()};
+    }
+
+    try {
+      ParameterSpec parameterSpec = ParameterSpec(storage);
+      result['parameterSpec'] = await parameterSpec.parse();
+    } catch (e) {
+      result['parameterSpec'] = {'error': e.toString()};
+    }
+
+    try {
+      InitOrder initOrder = InitOrder(storage);
+      result['initOrder'] = await initOrder.parse();
+    } catch (e) {
+      result['initOrder'] = {'error': e.toString()};
+    }
+
+    return result;
   }
 
   Future<List<String>> _visit(int indent, Storage storage, String path) async {
@@ -256,20 +315,717 @@ class _FileContentPageState extends State<FileContentPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.fileName.split(Platform.pathSeparator).last),
+        actions: [
+          if (invData != null)
+            IconButton(
+              icon: const Icon(Icons.table_chart),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => INVDataTablePage(invData: invData!),
+                  ),
+                );
+              },
+              tooltip: '표 형태로 보기',
+            ),
+        ],
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : error != null
               ? Center(child: Text('오류: $error'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: entries.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(entries[index]),
-                    );
-                  },
-                ),
+              : invData != null
+                  ? _buildINVDataView()
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      itemCount: entries.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(entries[index]),
+                        );
+                      },
+                    ),
+    );
+  }
+
+  Widget _buildINVDataView() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionCard('Device Spec', invData!['deviceSpec']),
+          const SizedBox(height: 16),
+          _buildSectionCard('IO Spec', invData!['ioSpec']),
+          const SizedBox(height: 16),
+          _buildSectionCard('Trip Spec', invData!['tripSpec']),
+          const SizedBox(height: 16),
+          _buildSectionCard('Message Spec', invData!['msgSpec']),
+          const SizedBox(height: 16),
+          _buildSectionCard('Common Spec', invData!['commonSpec']),
+          const SizedBox(height: 16),
+          _buildSectionCard('Parameter Spec', invData!['parameterSpec']),
+          const SizedBox(height: 16),
+          _buildSectionCard('Init Order', invData!['initOrder']),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard(String title, Map<String, dynamic> data) {
+    return Card(
+      child: ExpansionTile(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildDataTable(data),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataTable(Map<String, dynamic> data) {
+    List<DataRow> rows = [];
+
+    data.forEach((key, value) {
+      if (value is List) {
+        if (value.isNotEmpty && value.first is Map) {
+          // List<Map> 형태인 경우
+          rows.add(DataRow(
+            cells: [
+              DataCell(Text(key)),
+              DataCell(Text('${value.length}개 항목')),
+            ],
+          ));
+          for (int i = 0; i < value.length; i++) {
+            Map<String, dynamic> item = value[i];
+            item.forEach((itemKey, itemValue) {
+              rows.add(DataRow(
+                cells: [
+                  DataCell(Text('  $itemKey')),
+                  DataCell(Text(itemValue.toString())),
+                ],
+              ));
+            });
+          }
+        } else {
+          // 일반 List인 경우
+          rows.add(DataRow(
+            cells: [
+              DataCell(Text(key)),
+              DataCell(Text(value.toString())),
+            ],
+          ));
+        }
+      } else {
+        rows.add(DataRow(
+          cells: [
+            DataCell(Text(key)),
+            DataCell(Text(value.toString())),
+          ],
+        ));
+      }
+    });
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columns: const [
+          DataColumn(label: Text('필드명')),
+          DataColumn(label: Text('값')),
+        ],
+        rows: rows,
+      ),
+    );
+  }
+}
+
+class INVDataTablePage extends StatelessWidget {
+  final Map<String, dynamic> invData;
+
+  const INVDataTablePage({super.key, required this.invData});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 7,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('INV 데이터 표'),
+          bottom: const TabBar(
+            isScrollable: true,
+            tabs: [
+              Tab(text: 'Device Spec'),
+              Tab(text: 'IO Spec'),
+              Tab(text: 'Trip Spec'),
+              Tab(text: 'Message Spec'),
+              Tab(text: 'Common Spec'),
+              Tab(text: 'Parameter Spec'),
+              Tab(text: 'Init Order'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildDeviceSpecDetail(),
+            _buildIoSpecDetail(),
+            _buildTripSpecDetail(),
+            _buildMsgSpecDetail(),
+            _buildCommonSpecDetail(),
+            _buildParameterSpecDetail(),
+            _buildInitOrderDetail(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeviceSpecDetail() {
+    final data = invData['deviceSpec'] as Map<String, dynamic>;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBasicInfoTable('Device Spec 기본 정보', [
+            DataRow(cells: [
+              DataCell(Text('Data File Version')),
+              DataCell(Text(data['strDataFileVer'] ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Model No')),
+              DataCell(Text(data['nInvModelNo']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Model Name')),
+              DataCell(Text(data['strInvModelName'] ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('SW Version')),
+              DataCell(Text(data['strInvSWVer'] ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Code Version')),
+              DataCell(Text(data['strInvCodeVer'] ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Comm Offset')),
+              DataCell(Text(data['nCommOffset']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Total Diag Num')),
+              DataCell(Text(data['nTotalDiagNum']?.toString() ?? ''))
+            ]),
+          ]),
+          const SizedBox(height: 24),
+          _buildBasicInfoTable('통신 주소 정보', [
+            DataRow(cells: [
+              DataCell(Text('Model No Comm Addr')),
+              DataCell(Text(data['nModelNoCommAddr']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Code Ver Comm Addr')),
+              DataCell(Text(data['nCodeVerCommAddr']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Motor Status Comm Addr')),
+              DataCell(Text(data['nMotorStatusCommAddr']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Inv Status Comm Addr')),
+              DataCell(Text(data['nInvStatusCommAddr']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Inv Control Comm Addr')),
+              DataCell(Text(data['nInvControlCommAddr']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Parameter Save Comm Addr')),
+              DataCell(Text(data['nParameterSaveCommAddr']?.toString() ?? ''))
+            ]),
+          ]),
+          if (data['pDiagNum'] != null &&
+              (data['pDiagNum'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildListTable('Diagnostic Numbers', data['pDiagNum'] as List),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIoSpecDetail() {
+    final data = invData['ioSpec'] as Map<String, dynamic>;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBasicInfoTable('IO Spec 기본 정보', [
+            DataRow(cells: [
+              DataCell(Text('Total Input')),
+              DataCell(Text(data['nTotalInput']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Normal Input')),
+              DataCell(Text(data['nNormalInput']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Total Input Func Title')),
+              DataCell(Text(data['nTotalInputFuncTitle']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Total Output')),
+              DataCell(Text(data['nTotalOutput']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Normal Output')),
+              DataCell(Text(data['nNormalOutput']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Total Output Func Title')),
+              DataCell(Text(data['nTotalOutputFuncTitle']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Add Input Status')),
+              DataCell(Text(data['nAddInputStatus']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Add Output Status')),
+              DataCell(Text(data['nAddOutputStatus']?.toString() ?? ''))
+            ]),
+          ]),
+          if (data['pInputTermInfo'] != null &&
+              (data['pInputTermInfo'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildMapListTable('Input Terminal Info',
+                data['pInputTermInfo'] as List<Map<String, dynamic>>),
+          ],
+          if (data['pOutputTermInfo'] != null &&
+              (data['pOutputTermInfo'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildMapListTable('Output Terminal Info',
+                data['pOutputTermInfo'] as List<Map<String, dynamic>>),
+          ],
+          if (data['pInputFuncMsg'] != null &&
+              (data['pInputFuncMsg'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildListTable(
+                'Input Function Messages', data['pInputFuncMsg'] as List),
+          ],
+          if (data['pOutputFuncMsgTitle'] != null &&
+              (data['pOutputFuncMsgTitle'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildListTable('Output Function Messages',
+                data['pOutputFuncMsgTitle'] as List),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTripSpecDetail() {
+    final data = invData['tripSpec'] as Map<String, dynamic>;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBasicInfoTable('Trip Spec 기본 정보', [
+            DataRow(cells: [
+              DataCell(Text('Total Trip Name')),
+              DataCell(Text(data['nTotalTripName']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('First Trip Name Addr')),
+              DataCell(Text(data['nFirstTripNameAddr']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Cur Total Trip')),
+              DataCell(Text(data['nCurTotalTrip']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Total Trip Info')),
+              DataCell(Text(data['nTotalTripInfo']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Total Warn Name')),
+              DataCell(Text(data['nTotalWarnName']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('First Warn Name Addr')),
+              DataCell(Text(data['nFirstWarnNameAddr']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Cur Total Warn')),
+              DataCell(Text(data['nCurTotalWarn']?.toString() ?? ''))
+            ]),
+            DataRow(cells: [
+              DataCell(Text('Total Warn Info')),
+              DataCell(Text(data['nTotalWarnInfo']?.toString() ?? ''))
+            ]),
+          ]),
+          if (data['pTripName'] != null &&
+              (data['pTripName'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildListTable('Trip Names', data['pTripName'] as List),
+          ],
+          if (data['pWarnName'] != null &&
+              (data['pWarnName'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildListTable('Warning Names', data['pWarnName'] as List),
+          ],
+          if (data['pTripAddr'] != null &&
+              (data['pTripAddr'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildListTable('Trip Addresses', data['pTripAddr'] as List),
+          ],
+          if (data['pWarnAddr'] != null &&
+              (data['pWarnAddr'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildListTable('Warning Addresses', data['pWarnAddr'] as List),
+          ],
+          if (data['pTripInfoData'] != null &&
+              (data['pTripInfoData'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildMapListTable('Trip Info Data',
+                data['pTripInfoData'] as List<Map<String, dynamic>>),
+          ],
+          if (data['pWarnInfoData'] != null &&
+              (data['pWarnInfoData'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildMapListTable('Warning Info Data',
+                data['pWarnInfoData'] as List<Map<String, dynamic>>),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMsgSpecDetail() {
+    final data = invData['msgSpec'] as Map<String, dynamic>;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBasicInfoTable('Message Spec 기본 정보', [
+            DataRow(cells: [
+              DataCell(Text('Total Msg')),
+              DataCell(Text(data['nTotalMsg']?.toString() ?? ''))
+            ]),
+          ]),
+          if (data['pMsgInfo'] != null &&
+              (data['pMsgInfo'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildMsgInfoTable(
+                'Message Info', data['pMsgInfo'] as List<Map<String, dynamic>>),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommonSpecDetail() {
+    final data = invData['commonSpec'] as Map<String, dynamic>;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBasicInfoTable('Common Spec 기본 정보', [
+            DataRow(cells: [
+              DataCell(Text('Total Common No')),
+              DataCell(Text(data['nTotCommonNo']?.toString() ?? ''))
+            ]),
+          ]),
+          if (data['pCommonInfo'] != null &&
+              (data['pCommonInfo'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildMapListTable('Common Info',
+                data['pCommonInfo'] as List<Map<String, dynamic>>),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildParameterSpecDetail() {
+    final data = invData['parameterSpec'] as Map<String, dynamic>;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBasicInfoTable('Parameter Spec 기본 정보', [
+            DataRow(cells: [
+              DataCell(Text('Total Group')),
+              DataCell(Text(data['nTotGroup']?.toString() ?? ''))
+            ]),
+          ]),
+          if (data['pParmGrp'] != null &&
+              (data['pParmGrp'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildParameterGroupTable('Parameter Groups',
+                data['pParmGrp'] as List<Map<String, dynamic>>),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInitOrderDetail() {
+    final data = invData['initOrder'] as Map<String, dynamic>;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBasicInfoTable('Init Order 기본 정보', [
+            DataRow(cells: [
+              DataCell(Text('Total Init Order')),
+              DataCell(Text(data['nTotInitOder']?.toString() ?? ''))
+            ]),
+          ]),
+          if (data['pOrderAddr'] != null &&
+              (data['pOrderAddr'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildListTable('Order Addresses', data['pOrderAddr'] as List),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBasicInfoTable(String title, List<DataRow> rows) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text('필드명')),
+                  DataColumn(label: Text('값')),
+                ],
+                rows: rows,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListTable(String title, List list) {
+    List<DataRow> rows = [];
+    for (int i = 0; i < list.length; i++) {
+      rows.add(DataRow(
+        cells: [
+          DataCell(Text('항목 ${i + 1}')),
+          DataCell(Text(list[i].toString())),
+        ],
+      ));
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text('번호')),
+                  DataColumn(label: Text('값')),
+                ],
+                rows: rows,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMapListTable(String title, List<Map<String, dynamic>> mapList) {
+    if (mapList.isEmpty) return const SizedBox.shrink();
+
+    // 첫 번째 맵의 키들을 컬럼으로 사용
+    final keys = mapList.first.keys.toList();
+    List<DataColumn> columns = [
+      const DataColumn(label: Text('번호')),
+      ...keys.map((key) => DataColumn(label: Text(key))),
+    ];
+
+    List<DataRow> rows = [];
+    for (int i = 0; i < mapList.length; i++) {
+      List<DataCell> cells = [DataCell(Text('${i + 1}'))];
+      for (String key in keys) {
+        cells.add(DataCell(Text(mapList[i][key]?.toString() ?? '')));
+      }
+      rows.add(DataRow(cells: cells));
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: columns,
+                rows: rows,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMsgInfoTable(
+      String title, List<Map<String, dynamic>> msgInfoList) {
+    List<DataRow> rows = [];
+    for (int i = 0; i < msgInfoList.length; i++) {
+      final msgInfo = msgInfoList[i];
+      rows.add(DataRow(
+        cells: [
+          DataCell(Text('${i + 1}')),
+          DataCell(Text(msgInfo['nTotTitle']?.toString() ?? '')),
+          DataCell(Text((msgInfo['pTitle'] as List?)?.join(', ') ?? '')),
+        ],
+      ));
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text('번호')),
+                  DataColumn(label: Text('Total Title')),
+                  DataColumn(label: Text('Titles')),
+                ],
+                rows: rows,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildParameterGroupTable(
+      String title, List<Map<String, dynamic>> paramGroups) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            ...paramGroups.asMap().entries.map((entry) {
+              final index = entry.key;
+              final group = entry.value;
+              return ExpansionTile(
+                title: Text('Group ${index + 1}'),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (group['GrpInfo'] != null) ...[
+                          Text(
+                            'Group Info',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildMapTable(
+                              group['GrpInfo'] as Map<String, dynamic>),
+                          const SizedBox(height: 16),
+                        ],
+                        if (group['pParmType'] != null) ...[
+                          Text(
+                            'Parameters',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildMapListTable('',
+                              group['pParmType'] as List<Map<String, dynamic>>),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMapTable(Map<String, dynamic> map) {
+    List<DataRow> rows = [];
+    map.forEach((key, value) {
+      rows.add(DataRow(
+        cells: [
+          DataCell(Text(key)),
+          DataCell(Text(value.toString())),
+        ],
+      ));
+    });
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columns: const [
+          DataColumn(label: Text('필드명')),
+          DataColumn(label: Text('값')),
+        ],
+        rows: rows,
+      ),
     );
   }
 }

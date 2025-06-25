@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -16,55 +15,11 @@ const int dmdfUnitSize = 10; // DMDF_UNIT_SIZE
 const int dmdfSmallSize = 10; // DMDF_SMALL_SIZE
 
 //=================================================================================================
-// for inv
-//-------------------------------------------------------------------------------------------------
-// const String defPathDeviceInfo = "/Device Spec/Device Info";
-// const String defPathDiagNumber = "/Device Spec/Diag Number";
-// const String defPathIoInfo = "/IO Spec/IO Info";
-// const String defPathTerminalInfo = "/IO Spec/Terminal Info";
-// const String defPathIoFuncMsgTitle = "/IO Spec/IO Func Msg Title";
-// const String defPathTripInfo = "/Trip Spec/Trip Info";
-// const String defPathTripName = "/Trip Spec/Trip Name";
-// const String defPathCommAddr = "/Trip Spec/Comm Addr";
-// const String defPathTripInfoData = "/Trip Spec/Trip Info Data";
-// const String defPathTotalMessage = "/Message Spec/Total Message";
-// const String defPathMsgTitle = "/Message Spec/Msg Title";
-// const String defPathMsgTitleNum = "/Message Spec/Msg Title Num";
-// const String defPathCommonInfo = "/Common Spec/Common Info";
-// const String defPathTotalCommon = "/Common Spec/Total Common";
-// const String defPathTotalGroup = "/Parameter Spec/Total Group";
-// const String defPathParameter = "/Parameter Spec/Group-%1/Parameter";
-// const String defPathGroupInfo = "/Parameter Spec/Group-%1/Group Info";
-// const String defPathTotalInitOrder = "/Init Order/Total Init Order";
-// const String defPathInitOrderParaAddr = "/Init Order/Init Order Para Addr";
-
-//=================================================================================================
-int _readU16(Uint8List buffer, int offset) {
-  if (offset < 0 || offset + 2 > buffer.length) {
-    throw RangeError('Offset out of range: $offset');
-  }
-  return buffer[offset] | (buffer[offset + 1] << 8);
-}
-
 int _readU32(Uint8List buffer, int offset) {
   return buffer[offset] |
       (buffer[offset + 1] << 8) |
       (buffer[offset + 2] << 16) |
       (buffer[offset + 3] << 24);
-}
-
-int _readU64(Uint8List buffer, int offset) {
-  if (offset < 0 || offset + 8 > buffer.length) {
-    throw RangeError('Offset out of range: $offset');
-  }
-  return buffer[offset] |
-      (buffer[offset + 1] << 8) |
-      (buffer[offset + 2] << 16) |
-      (buffer[offset + 3] << 24) |
-      (buffer[offset + 4] << 32) |
-      (buffer[offset + 5] << 40) |
-      (buffer[offset + 6] << 48) |
-      (buffer[offset + 7] << 56);
 }
 
 String _readString(Uint8List buffer, int offset, int length) {
@@ -76,50 +31,9 @@ String _readString(Uint8List buffer, int offset, int length) {
   return String.fromCharCodes(bytes);
 }
 
-int _readArray(Array<Uint8> dst, Uint8List src, int offset, int length) {
-  for (int i = 0; i < length; i++) {
-    if (src[offset + i] == 0) break;
-    dst[i] = src[offset + i];
-  }
-  return length;
-}
-
-void _writeU16(Uint8List buffer, int offset, int value) {
-  if (offset < 0 || offset + 2 > buffer.length) {
-    throw RangeError('Offset out of range: $offset');
-  }
-  buffer[offset] = value & 0xFF;
-  buffer[offset + 1] = (value >> 8) & 0xFF;
-}
-
-void _writeU32(Uint8List buffer, int offset, int value) {
-  buffer[offset] = value & 0xFF;
-  buffer[offset + 1] = (value >> 8) & 0xFF;
-  buffer[offset + 2] = (value >> 16) & 0xFF;
-  buffer[offset + 3] = (value >> 24) & 0xFF;
-}
-
-void _writeU64(Uint8List buffer, int offset, int value) {
-  if (offset < 0 || offset + 8 > buffer.length) {
-    throw RangeError('Offset out of range: $offset');
-  }
-  buffer[offset] = value & 0xFF;
-  buffer[offset + 1] = (value >> 8) & 0xFF;
-  buffer[offset + 2] = (value >> 16) & 0xFF;
-  buffer[offset + 3] = (value >> 24) & 0xFF;
-  buffer[offset + 4] = (value >> 32) & 0xFF;
-  buffer[offset + 5] = (value >> 40) & 0xFF;
-  buffer[offset + 6] = (value >> 48) & 0xFF;
-  buffer[offset + 7] = (value >> 56) & 0xFF;
-}
-
-void _writeString(Uint8List buffer, int offset, String value, int length) {
-  List<int> bytes = value.codeUnits;
-  for (int i = 0; i < length; i++) {
-    buffer[offset + i] = i < bytes.length ? bytes[i] : 0;
-  }
-}
-
+//=================================================================================================
+// DeviceSpec 클래스: 장치 사양 정보 파싱
+//-------------------------------------------------------------------------------------------------
 class DeviceSpec {
   //===============================================================================================
   String strDataFileVer = ''; // Fixed-size array of 10 bytes
@@ -137,8 +51,7 @@ class DeviceSpec {
   int nInvControlCommAddr = 0;
   int nParameterSaveCommAddr = 0;
   //-----------------------------------------------------------------------------------------------
-  // Diag Number list
-  List<int> diagNumList = [];
+  List<int> diagNumList = []; // Diag Number list
   //-----------------------------------------------------------------------------------------------
   Storage storage;
   //===============================================================================================
@@ -266,31 +179,8 @@ class DeviceSpec {
 }
 
 //=================================================================================================
-// typedef struct _IO_INFO { ... } IO_INFO
+// IoSpec 클래스: 입출력 사양 정보 파싱
 //-------------------------------------------------------------------------------------------------
-// 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 = 32 bytes
-// /IO Spec/IO Info  (32)
-//const int ioInfoSize = 32;
-
-// final class IoInfo extends Struct {
-//   @Int32()
-//   external int nTotalInput;
-//   @Int32()
-//   external int nNormalInput;
-//   @Int32()
-//   external int nTotalInputFuncTitle;
-//   @Int32()
-//   external int nTotalOutput;
-//   @Int32()
-//   external int nNormalOutput;
-//   @Int32()
-//   external int nTotalOutputFuncTitle;
-
-//   @Int32() //입력 단자 상태 정보 통신주소
-//   external int nAddInputStatus;
-//   @Int32() //출력 단자 상태 정보 동신주소
-//   external int nAddOutputStatus;
-
 class IoSpec {
   //===============================================================================================
   int nTotalInput = 0;
@@ -448,6 +338,8 @@ class IoSpec {
 }
 
 //=================================================================================================
+// TripSpec 클래스: 트립 사양 정보 파싱
+//-------------------------------------------------------------------------------------------------
 class TripSpec {
   int nTotalTripName = 0;
   int nFirstTripNameAddr = 0;
@@ -643,6 +535,8 @@ class TripSpec {
 }
 
 //=================================================================================================
+// MsgSpec 클래스: 메시지 사양 정보 파싱
+//-------------------------------------------------------------------------------------------------
 class MsgSpec {
   int nTotalMsg = 0;
   //-----------------------------------------------------------------------------------------------
@@ -731,6 +625,8 @@ class MsgSpec {
 }
 
 //=================================================================================================
+// CommonSpec 클래스: 공통 사양 정보 파싱
+//-------------------------------------------------------------------------------------------------
 class CommonSpec {
   int nTotCommonNo = 0;
   //-----------------------------------------------------------------------------------------------
@@ -807,6 +703,8 @@ class CommonSpec {
 }
 
 //=================================================================================================
+// ParameterSpec 클래스: 파라미터 사양 정보 파싱
+//-------------------------------------------------------------------------------------------------
 class ParameterSpec {
   int nTotGroup = 0;
   //-----------------------------------------------------------------------------------------------
@@ -938,6 +836,8 @@ class ParameterSpec {
 // const String defPathInitOrderParaAddr = "/Init Order/Init Order Para Addr";
 
 //=================================================================================================
+// InitOrder 클래스: 초기화 순서 정보 파싱
+//-------------------------------------------------------------------------------------------------
 class InitOrder {
   int nTotInitOder = 0;
   //-----------------------------------------------------------------------------------------------

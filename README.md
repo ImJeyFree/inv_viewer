@@ -16,11 +16,11 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Unit Test
 
- flutter test test/widget_test.dart
- 00:04 +0: 앱이 정상적으로 빌드된다
- 00:04 +1: 앱이 정상적으로 빌드된다
-00:05 +1: 앱이 정상적으로 빌드된다<br>
-00:05 +1: All tests passed!<br>
+.\flutter .\test test\widget_test.dart
+- 00:04 +0: 앱이 정상적으로 빌드된다
+- 00:04 +1: 앱이 정상적으로 빌드된다
+- 00:05 +1: 앱이 정상적으로 빌드된다
+- 00:05 +1: All tests passed!
 <br>
 flutter test test/device_inv_spec_test.dart<br>
 00:02 +0: G100_1_30.INV parse() 동작 테스트 DeviceSpec parse() 호출 시 예외 없이 동작<br>

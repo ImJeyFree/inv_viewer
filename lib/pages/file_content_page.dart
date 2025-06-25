@@ -35,8 +35,10 @@ class _FileContentPageState extends State<FileContentPage> {
       //List<String> result = await readTripSpec(storage);
       //List<String> result = await readMsgSpec(storage);
       //List<String> result = await readCommonSpec(storage);
-      List<String> result = await readParameterSpec(storage);
+      //List<String> result = await readParameterSpec(storage);
       //List<String> result = await readInitOrder(storage);
+
+      List<String> result = await readINV(storage);
 
       setState(() {
         entries = result;
@@ -70,6 +72,33 @@ class _FileContentPageState extends State<FileContentPage> {
         result.addAll(subEntries);
       }
     }
+    return result;
+  }
+
+  Future<List<String>> readINV(Storage storage) async {
+    List<String> result = [];
+
+    final resDeviceSpec = await readDeviceSpec(storage);
+    result.addAll(resDeviceSpec);
+
+    final resIoSpec = await readIoSpec(storage);
+    result.addAll(resIoSpec);
+
+    final resTripSpec = await readTripSpec(storage);
+    result.addAll(resTripSpec);
+
+    final resMsgSpec = await readMsgSpec(storage);
+    result.addAll(resMsgSpec);
+
+    final resCommonSpec = await readCommonSpec(storage);
+    result.addAll(resCommonSpec);
+
+    final resParameterSpec = await readParameterSpec(storage);
+    result.addAll(resParameterSpec);
+
+    final resInitOrder = await readInitOrder(storage);
+    result.addAll(resInitOrder);
+
     return result;
   }
 

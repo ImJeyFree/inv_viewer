@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '파일 뷰어',
+      title: 'INV(MS-CFB) Viewer',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: const HomePage(),
     );
@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('파일 뷰어')),
+      appBar: AppBar(title: const Text('INV(MS-CFB) Viewer')),
       body: Center(
         child: ElevatedButton(
           onPressed: () => _pickFile(context),

@@ -312,22 +312,28 @@ class _FileContentPageState extends State<FileContentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.fileName.split(Platform.pathSeparator).last),
-        actions: [
-          if (invData != null)
-            IconButton(
-              icon: const Icon(Icons.table_chart),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => INVDataTablePage(invData: invData!),
-                  ),
-                );
-              },
-              tooltip: '표 형태로 보기',
-            ),
-        ],
+        title: Row(
+          //mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(widget.fileName.split(Platform.pathSeparator).last),
+            if (invData != null) ...[
+              const SizedBox(width: 16),
+              IconButton(
+                icon: const Icon(Icons.table_chart),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => INVDataTablePage(
+                          invData: invData!, fileName: widget.fileName),
+                    ),
+                  );
+                },
+                tooltip: '표 형태로 보기',
+              ),
+            ],
+          ],
+        ),
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
@@ -1006,8 +1012,10 @@ class _FileContentPageState extends State<FileContentPage> {
 
 class INVDataTablePage extends StatelessWidget {
   final Map<String, dynamic> invData;
+  final String fileName;
 
-  const INVDataTablePage({super.key, required this.invData});
+  const INVDataTablePage(
+      {super.key, required this.invData, required this.fileName});
 
   @override
   Widget build(BuildContext context) {
@@ -1015,7 +1023,7 @@ class INVDataTablePage extends StatelessWidget {
       length: 7,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('INV 데이터 표'),
+          title: Text('${fileName.split(Platform.pathSeparator).last} 데이터 표'),
           bottom: const TabBar(
             isScrollable: true,
             tabs: [

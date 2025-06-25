@@ -102,11 +102,10 @@ void _writeString(Uint8List buffer, int offset, String value, int length) {
 }
 
 //=================================================================================================
-
-/// POLE - Portable Dart library to access OLE Storage
-/// Original C++ version by Ariya Hidayat <ariya@kde.org>
-/// Ported to Dart
-
+// POLE - Portable Dart library to access OLE Storage
+// Original C++ version by Ariya Hidayat <ariya@kde.org>
+// Ported to Dart
+//-------------------------------------------------------------------------------------------------
 // Header class for OLE2 file format
 class Header {
   //final Uint8List id = Uint8List(8); // signature, or magic identifier

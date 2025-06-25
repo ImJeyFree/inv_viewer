@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:flutter/services.dart';
 import 'pole.dart';
 import 'device_inv.dart';
 
@@ -509,6 +507,12 @@ class _FileContentPageState extends State<FileContentPage> {
           const SizedBox(height: 24),
           _buildListTable(
               'Diagnostic Numbers', data['pDiagNum'] as List? ?? []),
+          if (data['pDiagNumDetails'] != null &&
+              (data['pDiagNumDetails'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildDiagNumDetailsTable(
+                'Diagnostic Numbers Details', data['pDiagNumDetails'] as List),
+          ],
         ],
       ),
     );
@@ -955,6 +959,49 @@ class _FileContentPageState extends State<FileContentPage> {
       ),
     );
   }
+
+  Widget _buildDiagNumDetailsTable(String title, List diagNumDetails) {
+    List<DataRow> rows = [];
+    for (int i = 0; i < diagNumDetails.length; i++) {
+      final detail = diagNumDetails[i] as Map<String, dynamic>?;
+      if (detail != null) {
+        final index = detail['index']?.toString() ?? '';
+        final value = detail['value']?.toString() ?? '';
+        rows.add(DataRow(
+          cells: [
+            DataCell(Text(index)),
+            DataCell(Text(value)),
+          ],
+        ));
+      }
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text('Index')),
+                  DataColumn(label: Text('Value')),
+                ],
+                rows: rows,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class INVDataTablePage extends StatelessWidget {
@@ -1064,6 +1111,12 @@ class INVDataTablePage extends StatelessWidget {
           const SizedBox(height: 24),
           _buildListTable(
               'Diagnostic Numbers', data['pDiagNum'] as List? ?? []),
+          if (data['pDiagNumDetails'] != null &&
+              (data['pDiagNumDetails'] as List).isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildDiagNumDetailsTable(
+                'Diagnostic Numbers Details', data['pDiagNumDetails'] as List),
+          ],
         ],
       ),
     );
@@ -1507,6 +1560,49 @@ class INVDataTablePage extends StatelessWidget {
           DataColumn(label: Text('값')),
         ],
         rows: rows,
+      ),
+    );
+  }
+
+  Widget _buildDiagNumDetailsTable(String title, List diagNumDetails) {
+    List<DataRow> rows = [];
+    for (int i = 0; i < diagNumDetails.length; i++) {
+      final detail = diagNumDetails[i] as Map<String, dynamic>?;
+      if (detail != null) {
+        final index = detail['index']?.toString() ?? '';
+        final value = detail['value']?.toString() ?? '';
+        rows.add(DataRow(
+          cells: [
+            DataCell(Text(index)),
+            DataCell(Text(value)),
+          ],
+        ));
+      }
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text('Index')),
+                  DataColumn(label: Text('Value')),
+                ],
+                rows: rows,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

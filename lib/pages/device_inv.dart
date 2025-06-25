@@ -152,6 +152,11 @@ class DeviceSpec {
     // print(' - nCommOffset: $nCommOffset');
     // print(' - nTotalDiagNum: $nTotalDiagNum');
     // print('   - diagNumber: $diagNumList');
+    // if (diagNumList.isNotEmpty) {
+    //   for (int i = 0; i < diagNumList.length; i++) {
+    //     print('     - diagNum[$i]: ${diagNumList[i]}');
+    //   }
+    // }
     // print(' - nModelNoCommAddr: $nModelNoCommAddr');
     // print(' - nCodeVerCommAddr: $nCodeVerCommAddr');
     // print(' - nMotorStatusCommAddr: $nMotorStatusCommAddr');
@@ -174,6 +179,14 @@ class DeviceSpec {
       'nInvControlCommAddr': nInvControlCommAddr,
       'nParameterSaveCommAddr': nParameterSaveCommAddr,
       'pDiagNum': diagNumList,
+      'pDiagNumDetails': diagNumList
+          .asMap()
+          .entries
+          .map((entry) => {
+                'index': entry.key,
+                'value': entry.value,
+              })
+          .toList(),
     };
   }
 }

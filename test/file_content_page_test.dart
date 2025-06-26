@@ -131,38 +131,38 @@ void main() {
       }
       expect(found, isTrue, reason: '표 보기 버튼이 노출되어야 합니다.');
 
-      // // INVDataViewPage 각 Spec 텍스트가 보이는지 확인
-      // final deviceSpecFinder = find.text('Device Spec');
-      // final ioSpecFinder = find.text('IO Spec');
-      // final tripSpecSpecFinder = find.text('Trip Spec');
-      // final msgSpecFinder = find.text('Message Spec');
-      // final commonSpecFinder = find.text('Common Spec');
-      // final parameterSpecFinder = find.text('Parameter Spec');
-      // final initOrderFinder = find.text('Init Order');
+      // INVDataViewPage 각 Spec 텍스트가 보이는지 확인
+      final deviceSpecFinder = find.text('Device Spec');
+      final ioSpecFinder = find.text('IO Spec');
+      final tripSpecSpecFinder = find.text('Trip Spec');
+      final msgSpecFinder = find.text('Message Spec');
+      final commonSpecFinder = find.text('Common Spec');
+      final parameterSpecFinder = find.text('Parameter Spec');
+      final initOrderFinder = find.text('Init Order');
 
-      // print(' 리스트로 보기');
-      // print(
-      //     ' - Device Spec : \\${deviceSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - IO Spec : \\${ioSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Trip Spec: \\${tripSpecSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Message Spec : \\${msgSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Common Spec : \\${commonSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Parameter Spec : \\${parameterSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Init Order : \\${initOrderFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(' 리스트로 보기');
+      print(
+          ' - Device Spec : ${deviceSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - IO Spec : ${ioSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Trip Spec: ${tripSpecSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Message Spec : ${msgSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Common Spec : ${commonSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Parameter Spec : ${parameterSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Init Order : ${initOrderFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
 
-      // expect(deviceSpecFinder, findsOneWidget);
-      // expect(ioSpecFinder, findsOneWidget);
-      // expect(tripSpecSpecFinder, findsOneWidget);
-      // expect(msgSpecFinder, findsOneWidget);
-      // expect(commonSpecFinder, findsOneWidget);
-      // expect(parameterSpecFinder, findsOneWidget);
-      // expect(initOrderFinder, findsOneWidget);
+      expect(deviceSpecFinder, findsOneWidget);
+      expect(ioSpecFinder, findsOneWidget);
+      expect(tripSpecSpecFinder, findsOneWidget);
+      expect(msgSpecFinder, findsOneWidget);
+      expect(commonSpecFinder, findsOneWidget);
+      expect(parameterSpecFinder, findsOneWidget);
+      expect(initOrderFinder, findsOneWidget);
     });
 
     testWidgets('표로 보기 - 각 Spec 탭 정상 표시', (WidgetTester tester) async {
@@ -186,39 +186,38 @@ void main() {
       await tester.tap(find.byIcon(Icons.table_chart));
       await tester.pumpAndSettle();
 
-      // // INVDataTablePage의 탭 중 하나가 보이는지 터미널에 출력
-      // final deviceSpecTabFinder = find.text('Device Spec');
-      // final ioSpecTabFinder = find.text('IO Spec');
-      // final tripSpecTabFinder = find.text('Trip Spec');
-      // final msgSpecTabFinder = find.text('Message Spec');
-      // final commonSpecTabFinder = find.text('Common Spec');
-      // final parameterSpecTabFinder = find.text('Parameter Spec');
-      // final initOrderTabFinder = find.text('Init Order');
+      // INVDataTablePage의 탭 중 하나가 보이는지 터미널에 출력
+      final deviceSpecTabFinder = find.text('Device Spec');
+      final ioSpecTabFinder = find.text('IO Spec');
+      final tripSpecTabFinder = find.text('Trip Spec');
+      final msgSpecTabFinder = find.text('Message Spec');
+      final commonSpecTabFinder = find.text('Common Spec');
+      final parameterSpecTabFinder = find.text('Parameter Spec');
+      final initOrderTabFinder = find.text('Init Order');
 
-      // print(' 표로 보기');
-      // print(
-      //     ' - Device Spec : \\${deviceSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - IO Spec : \\${ioSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Trip Spec : \\${tripSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Message Spec : \\${msgSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Common Spec : \\${commonSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Parameter Spec : \\${parameterSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print(
-      //     ' - Init Order : \\${initOrderTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
-      // print('');
+      print(' 표로 보기');
+      print(
+          ' - Device Spec : ${deviceSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - IO Spec : ${ioSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Trip Spec : ${tripSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Message Spec : ${msgSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Common Spec : ${commonSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Parameter Spec : ${parameterSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+      print(
+          ' - Init Order : ${initOrderTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
 
-      // expect(deviceSpecTabFinder, findsWidgets);
-      // expect(ioSpecTabFinder, findsWidgets);
-      // expect(tripSpecTabFinder, findsWidgets);
-      // expect(msgSpecTabFinder, findsWidgets);
-      // expect(commonSpecTabFinder, findsWidgets);
-      // expect(parameterSpecTabFinder, findsWidgets);
-      // expect(initOrderTabFinder, findsWidgets);
+      expect(deviceSpecTabFinder, findsWidgets);
+      expect(ioSpecTabFinder, findsWidgets);
+      expect(tripSpecTabFinder, findsWidgets);
+      expect(msgSpecTabFinder, findsWidgets);
+      expect(commonSpecTabFinder, findsWidgets);
+      expect(parameterSpecTabFinder, findsWidgets);
+      expect(initOrderTabFinder, findsWidgets);
     });
   });
 }

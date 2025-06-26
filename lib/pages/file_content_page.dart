@@ -6,7 +6,8 @@ import 'device_inv.dart';
 
 class FileContentPage extends StatefulWidget {
   final String fileName;
-  const FileContentPage({super.key, required this.fileName});
+  final Storage? storage;
+  const FileContentPage({super.key, required this.fileName, this.storage});
 
   @override
   State<FileContentPage> createState() => _FileContentPageState();
@@ -21,19 +22,40 @@ class _FileContentPageState extends State<FileContentPage> {
   @override
   void initState() {
     super.initState();
+    // 파일명 없거나 확장자 .inv/.INV가 아니면 예외 처리
+    if (widget.fileName.isEmpty ||
+        !(widget.fileName.toLowerCase().endsWith('.inv'))) {
+      setState(() {
+        loading = false;
+        error = '지원하지 않는 파일입니다: ${widget.fileName}';
+      });
+      return;
+    }
+    // print('FileContentPage::initState() - ');
     _loadFile();
   }
 
   Future<void> _loadFile() async {
+    // print('FileContentPage::_loadFile() - ${widget.fileName}');
     try {
       setState(() {
         loading = true;
         error = null;
       });
 
-      Storage storage = Storage(fileName: widget.fileName);
-      bool res = await storage.open();
-      if (!res) throw Exception('Storage open failed');
+      // print('FileContentPage::_loadFile() - storage create');
+      Storage storage = widget.storage ?? Storage(fileName: widget.fileName);
+      if (widget.storage == null) {
+        bool res = await storage.open();
+        // print('FileContentPage::_loadFile() - storage.open() end');
+        if (!res) {
+          print(
+              'FileContentPage::_loadFile() - storage.open() : Storage open failed !!!');
+          throw Exception('Storage open failed');
+        } else {
+          // print('FileContentPage::_loadFile() - storage.open() : success !!!');
+        }
+      }
 
       // INV 파일인지 확인
       if (widget.fileName.toLowerCase().endsWith('.inv')) {
@@ -45,16 +67,24 @@ class _FileContentPageState extends State<FileContentPage> {
 
       setState(() {
         loading = false;
+        //print('invData(setState): ' + invData.toString());
       });
+      //print('최종 invData: ' + invData.toString());
     } catch (e) {
+      // print('FileContentPage 파싱 에러: ' + e.toString());
       setState(() {
         loading = false;
         error = e.toString();
+        print('invData(setState, error): ' + invData.toString());
       });
+      // print('최종 invData(에러): ' + invData.toString());
     }
+    // print('FileContentPage::_loadFile() - loading: $loading');
   }
 
   Future<Map<String, dynamic>> parseINVData(Storage storage) async {
+    // print('FileContentPage::parseINVData() - ');
+
     Map<String, dynamic> result = {};
 
     try {
@@ -133,6 +163,8 @@ class _FileContentPageState extends State<FileContentPage> {
   }
 
   Future<List<String>> readINV(Storage storage) async {
+    // print('FileContentPage::readINV() - ');
+
     List<String> result = [];
 
     final resDeviceSpec = await readDeviceSpec(storage);
@@ -160,6 +192,8 @@ class _FileContentPageState extends State<FileContentPage> {
   }
 
   Future<List<String>> readDeviceSpec(Storage storage) async {
+    // print('FileContentPage::readDeviceSpec() - ');
+
     List<String> result = [];
 
     DeviceSpec spec = DeviceSpec(storage);
@@ -312,27 +346,32 @@ class _FileContentPageState extends State<FileContentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          //mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(widget.fileName.split(Platform.pathSeparator).last),
-            if (invData != null) ...[
-              const SizedBox(width: 16),
-              IconButton(
-                icon: const Icon(Icons.table_chart),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => INVDataTablePage(
-                          invData: invData!, fileName: widget.fileName),
-                    ),
-                  );
-                },
-                tooltip: '표 형태로 보기',
+        title: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              Text(
+                widget.fileName.split(Platform.pathSeparator).last,
+                overflow: TextOverflow.ellipsis,
               ),
+              if (invData != null) ...[
+                const SizedBox(width: 16),
+                IconButton(
+                  icon: const Icon(Icons.table_chart),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => INVDataTablePage(
+                            invData: invData!, fileName: widget.fileName),
+                      ),
+                    );
+                  },
+                  tooltip: '표 형태로 보기',
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       body: loading
@@ -340,7 +379,7 @@ class _FileContentPageState extends State<FileContentPage> {
           : error != null
               ? Center(child: Text('오류: $error'))
               : invData != null
-                  ? _buildINVDataView()
+                  ? INVDataViewPage()
                   : ListView.builder(
                       padding: const EdgeInsets.all(16.0),
                       itemCount: entries.length,
@@ -353,7 +392,7 @@ class _FileContentPageState extends State<FileContentPage> {
     );
   }
 
-  Widget _buildINVDataView() {
+  Widget INVDataViewPage() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(

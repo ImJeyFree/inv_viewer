@@ -495,16 +495,20 @@ class AllocTable {
   }
 }
 
-// Directory Entry class for OLE2 file format
+//=================================================================================================
+// OLE 파일의 디렉터리 항목을 나타내는 클래스
+// - 각 항목은 스트림(파일)이거나 저장소(디렉터리)일 수 있다.
+//-------------------------------------------------------------------------------------------------
 class DirEntry {
-  bool valid = false;
-  String name = '';
-  bool dir = false;
-  int size = 0;
-  int start = 0;
-  int prev = 0;
-  int next = 0;
-  int child = 0;
+  bool valid = false; // 항목이 유효한지 여부
+  String name = ''; // 항목의 이름
+  bool dir = false; // // 항목이 디렉터리(저장소)인지 여부
+  int size =
+      0; // 스트림의 크기 (바이트 단위). 디렉터리인 경우 0. MS-CFB 명세에는 64비트지만, POLE C++ 구현은 load/save 시 32비트로 처리
+  int start = 0; // 스트림/저장소 데이터의 시작 블록 인덱스
+  int prev = 0; // 이전 형제 항목의 인덱스 (DirTree 내)
+  int next = 0; // 다음 형제 항목의 인덱스 (DirTree 내)
+  int child = 0; // 첫 번째 자식 항목의 인덱스 (디렉터리인 경우, DirTree 내)
 
   DirEntry();
 
@@ -1116,21 +1120,26 @@ class StorageIO {
   }
 
   Future<bool> open({bool writeAccess = false, bool create = false}) async {
-    // print('StorageIO::open() - writeAccess: $writeAccess, create: $create');
+    // print(
+    //     'StorageIO::open() - writeAccess: $writeAccess, create: $create, filename: $filename');
     try {
       close();
 
+      // print('StorageIO::open() - File($filename)');
       File file = File(filename);
+      // print('StorageIO::open() - 1');
       if (!await file.exists() && !create) {
-        print('StorageIO::open() - file.exists(): openFailed');
+        // print('StorageIO::open() - file.exists(): openFailed');
         result = Storage.openFailed;
         return false;
       }
 
+      // print('StorageIO::open() - file.create() : $create');
       if (create) {
         await file.create(recursive: true);
       }
 
+      // print('StorageIO::open() -file.open() ');
       raf = await file.open(mode: writeAccess ? FileMode.write : FileMode.read);
       opened = true;
       writeable = writeAccess;
@@ -1140,18 +1149,22 @@ class StorageIO {
       // print('StorageIO::open() - filesize: $filesize');
 
       if (create) {
+        // print('StorageIO::open() - init() !!!');
         init();
       } else {
+        // print('StorageIO::open() - load() !!!');
         await load(writeAccess);
       }
 
       result = Storage.ok;
+      // print('StorageIO::open() - Storage.ok !!!');
       return true;
     } catch (e) {
-      print('StorageIO::open() error - $errorPropertyTextConfiguration');
+      // print('StorageIO::open() error - $errorPropertyTextConfiguration');
       close();
 
       result = Storage.openFailed;
+      // print('StorageIO::open() - Storage.openFailed !!!');
       return false;
     }
   }
@@ -2276,7 +2289,6 @@ class Storage {
   static const int unknownError = 4;
 
   final String filename;
-  late File _file;
   late StorageIO _io;
 
   Storage({required String fileName}) : filename = fileName {
@@ -2285,7 +2297,7 @@ class Storage {
 
   /// Opens the storage. Returns true if no error occurs.
   Future<bool> open({bool writeAccess = false, bool create = false}) async {
-    //print('Storage::open');
+    // print('Storage::open');
     return _io.open(writeAccess: writeAccess, create: create);
   }
 

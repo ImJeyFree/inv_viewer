@@ -9,10 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:inv_viewer/main.dart';
 
-// ½ÇÇà: flutter test test\widget_test.dart
+// ì‹¤í–‰: flutter test test\widget_test.dart
 
 void main() {
-  testWidgets('¾ÛÀÌ Á¤»óÀûÀ¸·Î ºôµåµÈ´Ù', (WidgetTester tester) async {
+  testWidgets('ì•±ì´ ì •ìƒì ìœ¼ë¡œ ë¹Œë“œëœë‹¤', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     expect(find.byType(MyApp), findsOneWidget);
   });

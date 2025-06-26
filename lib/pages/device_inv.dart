@@ -330,8 +330,8 @@ class IoSpec {
     // print(' - nAddOutputStatus: $nAddOutputStatus');
     // print('   - pInputTermInfo: $inputTermInfoList');
     // print('   - pOutputTermInfo: $outputTerminalInfoList');
-    // print('   - inputFuncMsgTitleList: $inputFuncMsgList');
-    // print('   - outputFuncMsgTitleList: $outputFuncMsgList');
+    // print('   - pInputFuncMsg: $inputFuncMsgList');
+    // print('   - pOutputFuncMsgTitle: $outputFuncMsgList');
 
     return {
       'nTotalInput': nTotalInput,

@@ -11,7 +11,7 @@ void main([List<String>? args]) {
       ? args.first
       : (Platform.environment['INV_FILE'] ?? 'G100_1_30.INV');
 
-  group('$fileName parse() 동작 테스트', () {
+  group('$fileName Parse :', () {
     late Storage storage;
 
     setUp(() async {
@@ -23,7 +23,7 @@ void main([List<String>? args]) {
       await storage.close();
     });
 
-    test('DeviceSpec parse() 호출 시 예외 없이 동작', () async {
+    test('DeviceSpec parse() 호출 정상 동작', () async {
       final spec = DeviceSpec(storage);
       try {
         await spec.parse();
@@ -33,7 +33,7 @@ void main([List<String>? args]) {
       }
     });
 
-    test('IoSpec parse() 호출 시 예외 없이 동작', () async {
+    test('IoSpec parse() 호출 정상 동작', () async {
       final spec = IoSpec(storage);
       try {
         await spec.parse();
@@ -43,7 +43,7 @@ void main([List<String>? args]) {
       }
     });
 
-    test('TripSpec parse() 호출 시 예외 없이 동작', () async {
+    test('TripSpec parse() 호출 정상 동작', () async {
       final spec = TripSpec(storage);
       try {
         await spec.parse();
@@ -53,7 +53,7 @@ void main([List<String>? args]) {
       }
     });
 
-    test('MsgSpec parse() 호출 시 예외 없이 동작', () async {
+    test('MsgSpec parse() 호출 정상 동작', () async {
       final spec = MsgSpec(storage);
       try {
         await spec.parse();
@@ -63,7 +63,7 @@ void main([List<String>? args]) {
       }
     });
 
-    test('CommonSpec parse() 호출 시 예외 없이 동작', () async {
+    test('CommonSpec parse() 호출 정상 동작', () async {
       final spec = CommonSpec(storage);
       try {
         await spec.parse();
@@ -73,7 +73,7 @@ void main([List<String>? args]) {
       }
     });
 
-    test('ParameterSpec parse() 호출 시 예외 없이 동작', () async {
+    test('ParameterSpec parse() 호출 정상 동작', () async {
       final spec = ParameterSpec(storage);
       try {
         await spec.parse();
@@ -83,7 +83,7 @@ void main([List<String>? args]) {
       }
     });
 
-    test('InitOrder parse() 호출 시 예외 없이 동작', () async {
+    test('InitOrder parse() 호출 정상 동작', () async {
       final spec = InitOrder(storage);
       try {
         await spec.parse();

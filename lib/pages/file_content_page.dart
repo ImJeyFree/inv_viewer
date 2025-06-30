@@ -197,7 +197,14 @@ class _FileContentPageState extends State<FileContentPage> {
     List<String> result = [];
 
     DeviceSpec spec = DeviceSpec(storage);
-    final res = await spec.parse();
+    //final res = await spec.parse();
+
+    SpecFromJson specJson = SpecFromJson();
+    // specJson
+    //     .loadFile('C:\\workspace\\flutter\\inv_viewer\\assets\\S300_1_00.json');
+    specJson.loadAssets('assets/S300_1_00.json');
+
+    final res = specJson.deviceSpec(spec);
 
     result.add('Parsed DeviceSpec:');
     result.add('  strDataFileVer: ${res['strDataFileVer']}');

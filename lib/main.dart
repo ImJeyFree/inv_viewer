@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'pages/file_content_page.dart';
+import 'pages/json_content_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,14 +28,32 @@ class HomePage extends StatelessWidget {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
       if (result != null) {
         if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FileContentPage(
-                fileName: result.files.single.path!,
+          if (result.files.single.path!
+              .toLowerCase()
+              .toString()
+              .endsWith('.inv')) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FileContentPage(
+                  fileName: result.files.single.path!,
+                ),
               ),
-            ),
-          );
+            );
+          }
+          if (result.files.single.path!
+              .toLowerCase()
+              .toString()
+              .endsWith('.json')) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => JsonContentPage(
+                  filePath: result.files.single.path!,
+                ),
+              ),
+            );
+          }
         }
       }
     } catch (e) {

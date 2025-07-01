@@ -1130,8 +1130,8 @@ class SpecFromJson {
         if (await titleFromJson.loadFile(titlePath)) {
           //final res = titleFromJson.titles();
           mapTitle = titleFromJson.titles();
-          print(
-              'SpecFromJson::loadJson() - Title 파일 로드 성공: ${titleFromJson.mapTitle.length}개 항목');
+          // print(
+          //     'SpecFromJson::loadJson() - Title 파일 로드 성공: ${titleFromJson.mapTitle.length}개 항목');
         } else {
           print(
               'SpecFromJson::loadJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath');
@@ -1193,8 +1193,8 @@ class SpecFromJson {
         'nInvStatusCommAddr': spec.nInvStatusCommAddr,
         'nInvControlCommAddr': spec.nInvControlCommAddr,
         'nParameterSaveCommAddr': spec.nParameterSaveCommAddr,
-        'pDiagNum': {}, //spec.diagNumList,
-        'pDiagNumDetails': {}
+        'pDiagNum': <dynamic>[], // 빈 리스트로 반환
+        'pDiagNumDetails': <dynamic>[], // 빈 리스트로 반환
       };
     } catch (e) {
       print('DeviceSpec JSON 파싱 중 오류 발생: $e');
@@ -1265,7 +1265,9 @@ class SpecFromJson {
         // inputTermInfoList 설정
         final termInfoData = inputData['BasicTerminalInfo'];
         if (termInfoData is List) {
-          for (int nCnt = 0; nCnt < spec.nNormalInput; nCnt++) {
+          for (int nCnt = 0;
+              nCnt < spec.nNormalInput && nCnt < termInfoData.length;
+              nCnt++) {
             final info = termInfoData[nCnt];
             Map<String, dynamic> map = {
               'strName': makeTitleWithAtValue(
@@ -1278,7 +1280,9 @@ class SpecFromJson {
 
         final extTerminalInfo = inputData['ExtTerminalInfo'];
         if (extTerminalInfo is List) {
-          for (int nCnt = 0; nCnt < nTotalNumOfExt; nCnt++) {
+          for (int nCnt = 0;
+              nCnt < nTotalNumOfExt && nCnt < extTerminalInfo.length;
+              nCnt++) {
             final info = extTerminalInfo[nCnt];
             Map<String, dynamic> map = {
               'strName': makeTitleWithAtValue(
@@ -1316,7 +1320,9 @@ class SpecFromJson {
         spec.outputTermInfoList.clear();
         final termInfoData = outputData['BasicTerminalInfo'];
         if (termInfoData is List) {
-          for (int nCnt = 0; nCnt < spec.nNormalOutput; nCnt++) {
+          for (int nCnt = 0;
+              nCnt < spec.nNormalOutput && nCnt < termInfoData.length;
+              nCnt++) {
             final info = termInfoData[nCnt];
             Map<String, dynamic> map = {
               'strName': makeTitleWithAtValue(
@@ -1329,7 +1335,9 @@ class SpecFromJson {
 
         final extTerminalInfo = outputData['ExtTerminalInfo'];
         if (extTerminalInfo is List) {
-          for (int nCnt = 0; nCnt < nTotalNumOfExt; nCnt++) {
+          for (int nCnt = 0;
+              nCnt < nTotalNumOfExt && nCnt < extTerminalInfo.length;
+              nCnt++) {
             final info = extTerminalInfo[nCnt];
             Map<String, dynamic> map = {
               'strName': makeTitleWithAtValue(
@@ -1754,7 +1762,7 @@ class SpecFromJson {
       spec.nTotGroup = spec.parmGrpList.length;
       result = {
         'nTotGroup': spec.nTotGroup,
-        'pGrpInfo': spec.parmGrpList,
+        'pParmGrp': spec.parmGrpList,
       };
     } catch (e) {
       print('ParameterSpec JSON 파싱 중 오류 발생: $e');

@@ -1083,18 +1083,28 @@ class INVDataTablePage extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildDeviceSpecDetail(),
-            _buildIoSpecDetail(),
-            _buildTripSpecDetail(),
-            _buildMsgSpecDetail(),
-            _buildCommonSpecDetail(),
-            _buildParameterSpecDetail(),
-            _buildInitOrderDetail(),
-          ],
-        ),
+        body: InvDataTabView(invData: invData),
       ),
+    );
+  }
+}
+
+class InvDataTabView extends StatelessWidget {
+  final Map<String, dynamic> invData;
+  const InvDataTabView({super.key, required this.invData});
+
+  @override
+  Widget build(BuildContext context) {
+    return TabBarView(
+      children: [
+        _buildDeviceSpecDetail(),
+        _buildIoSpecDetail(),
+        _buildTripSpecDetail(),
+        _buildMsgSpecDetail(),
+        _buildCommonSpecDetail(),
+        _buildParameterSpecDetail(),
+        _buildInitOrderDetail(),
+      ],
     );
   }
 

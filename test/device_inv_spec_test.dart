@@ -7,9 +7,11 @@ import 'dart:io';
 
 void main([List<String>? args]) {
   // 커맨드라인 인자에서 파일명 추출, 없으면 기본값 사용
-  final fileName = (args != null && args.isNotEmpty)
-      ? args.first
-      : (Platform.environment['INV_FILE'] ?? 'G100_1_30.INV');
+  final fileName =
+      (args != null && args.isNotEmpty)
+          ? args.first
+          : (Platform.environment['INV_FILE'] ??
+              'assets/DataFile/LSIS/G100/G100_1_30.INV');
 
   group('$fileName Parse :', () {
     late Storage storage;

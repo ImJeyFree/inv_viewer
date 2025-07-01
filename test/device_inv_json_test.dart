@@ -1,33 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inv_viewer/pages/device_inv.dart';
-import 'package:inv_viewer/pages/pole.dart';
-import 'dart:io';
-import 'dart:convert';
 
 // 실행: flutter test test/device_inv_json_test.dart
-
-// 16진수 주소 문자열을 정수로 변환하는 헬퍼 함수 (테스트용)
-int _parseHexAddress(String hexString) {
-  try {
-    if (hexString.startsWith('0x') || hexString.startsWith('0X')) {
-      return int.parse(hexString.substring(2), radix: 16);
-    }
-    return int.parse(hexString, radix: 16);
-  } catch (e) {
-    return 0;
-  }
-}
 
 void main() {
   // Flutter 바인딩 초기화
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  String fileName = 'assets/S300_1_00.json';
+  String fileName = 'assets/DataFile/LSIS/S300/S300_1_00.json';
   SpecFromJson specFromJson = SpecFromJson();
 
   group('$fileName Parse :', () {
-    late Storage storage;
-
     setUp(() async {
       // JSON 파일 로드
       await specFromJson.loadAssets(fileName);

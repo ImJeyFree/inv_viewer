@@ -984,7 +984,7 @@ class TitleFromJson {
     //    - assets/LSIS/S300/S300_1_00_Title.json
     //---------------------------------------------------------------------------------------------
 
-    print('TitleFromJson::loadAssets() - 파일 경로: $filePath');
+    // print('TitleFromJson::loadAssets() - 파일 경로: $filePath');
     try {
       // assets 폴더의 파일을 읽기 위해 rootBundle 사용, 'assets/S300_1_00.json';
       final jsonString = await rootBundle.loadString(filePath);
@@ -999,7 +999,7 @@ class TitleFromJson {
   }
 
   Future<bool> loadFile(String filePath) async {
-    print('TitleFromJson::loadFile() - 파일 경로: $filePath');
+    //print('TitleFromJson::loadFile() - 파일 경로: $filePath');
     try {
       final file = File(filePath);
       final jsonString = await file.readAsString();
@@ -1092,8 +1092,8 @@ class SpecFromJson {
         if (await titleFromJson.loadAssets(titlePath)) {
           //final res = titleFromJson.titles();
           mapTitle = titleFromJson.titles();
-          print(
-              'SpecFromJson::loadAssetsJson() - Title 파일 로드 성공: ${titleFromJson.mapTitle.length}개 항목');
+          // print(
+          //     'SpecFromJson::loadAssetsJson() - Title 파일 로드 성공: ${titleFromJson.mapTitle.length}개 항목');
         } else {
           print(
               'SpecFromJson::loadAssetsJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath');
@@ -1200,6 +1200,27 @@ class SpecFromJson {
       print('DeviceSpec JSON 파싱 중 오류 발생: $e');
       return result;
     }
+
+    // print(' - strDataFileVer: ${spec.strDataFileVer}');
+    // print(' - nInvModelNo: ${spec.nInvModelNo}');
+    // print(' - strInvModelName: ${spec.strInvModelName}');
+    // print(' - strInvSWVer: ${spec.strInvSWVer}');
+    // print(' - strInvCodeVer: ${spec.strInvCodeVer}');
+    // print(' - nCommOffset: ${spec.nCommOffset}');
+    // print(' - nTotalDiagNum: ${spec.nTotalDiagNum}');
+    // // print('   - diagNumber: $spec.diagNumList');
+    // // if (spec.diagNumList.isNotEmpty) {
+    // //   for (int i = 0; i < spec.diagNumList.length; i++) {
+    // //     print('     - diagNum[$i]: ${spec.diagNumList[i]}');
+    // //   }
+    // // }
+    // print(' - nModelNoCommAddr: ${spec.nModelNoCommAddr}');
+    // print(' - nCodeVerCommAddr: ${spec.nCodeVerCommAddr}');
+    // print(' - nMotorStatusCommAddr: ${spec.nMotorStatusCommAddr}');
+    // print(' - nInvStatusCommAddr: ${spec.nInvStatusCommAddr}');
+    // print(' - nInvControlCommAddr: ${spec.nInvControlCommAddr}');
+    // print(' - nParameterSaveCommAddr: ${spec.nParameterSaveCommAddr}');
+
     return result;
   }
 
@@ -1350,6 +1371,19 @@ class SpecFromJson {
       print('IoSpec JSON 파싱 중 오류 발생: $e');
     }
 
+    // print(' - nTotalInput: ${spec.nTotalInput}');
+    // print(' - nNormalInput: ${spec.nNormalInput}');
+    // print(' - nTotalInputFuncTitle: ${spec.nTotalInputFuncTitle}');
+    // print(' - nTotalOutput: ${spec.nTotalOutput}');
+    // print(' - nNormalOutput: ${spec.nNormalOutput}');
+    // print(' - nTotalOutputFuncTitle: ${spec.nTotalOutputFuncTitle}');
+    // print(' - nAddInputStatus: ${spec.nAddInputStatus}');
+    // print(' - nAddOutputStatus: ${spec.nAddOutputStatus}');
+    // print('   - pInputTermInfo: ${spec.inputTermInfoList}');
+    // print('   - pOutputTermInfo: ${spec.outputTermInfoList}');
+    // print('   - pInputFuncMsg: ${spec.inputFuncMsgList}');
+    // print('   - pOutputFuncMsgTitle: ${spec.outputFuncMsgList}');
+
     return result;
   }
 
@@ -1374,16 +1408,13 @@ class SpecFromJson {
       }
       List<Map<String, dynamic>> statusInfoHash = [];
 
+      // print('SpecFromJson::tripSpec()  1');
       if (statusInfo is List) {
         for (var info in statusInfo) {
           String pMessage = '';
           String strUnit = '';
           final msgId = info['Message::id'];
-          if (msgId == null ||
-              msgId.isEmpty ||
-              msgId.toString().contains('null')) {
-            pMessage = '';
-          } else {
+          if (msgId != null && msgId is int) {
             if (msgRes.isEmpty) {
               msgRes = msgFromMsg(msgSpec);
             }
@@ -1435,30 +1466,52 @@ class SpecFromJson {
       if (tripInfoData is List) {
         spec.nTotalTripInfo = tripInfoData.length;
         for (var element in tripInfoData) {
-          final info = statusInfoHash[element['StatusInfo::id']];
-          if (info.isNotEmpty) {
-            Map<String, dynamic> map = {
-              'nCommAddr': _parseHexAddress(element['CommAddr'].toString()),
-              'strName': info['strName'],
-              'nDataType': info['nDataType'],
-              'nPointMsg': info['nPoint'],
-              'strUnit': info['strUnit']
-            };
-            spec.tripInfoDataList.add(map);
+          final statusInfoId = element['StatusInfo::id'];
+          int? statusInfoIndex;
+
+          if (statusInfoId is int) {
+            statusInfoIndex = statusInfoId;
+          } else if (statusInfoId is String) {
+            statusInfoIndex = int.tryParse(statusInfoId);
+          }
+
+          if (statusInfoIndex != null &&
+              statusInfoIndex >= 0 &&
+              statusInfoIndex < statusInfoHash.length) {
+            final info = statusInfoHash[statusInfoIndex];
+            if (info.isNotEmpty) {
+              Map<String, dynamic> map = {
+                'nCommAddr': _parseHexAddress(element['CommAddr'].toString()),
+                'strName': info['strName'],
+                'nDataType': info['nDataType'],
+                'nPointMsg': info['nPoint'],
+                'strUnit': info['strUnit']
+              };
+              spec.tripInfoDataList.add(map);
+            }
+          } else {
+            print('TripSpec: StatusInfo::id 변환 실패: $statusInfoId');
           }
         }
       }
 
       spec.tripNameList.clear();
-      final tripMsgId = currentTrip['Message::id'];
-      if (tripMsgId != null && tripMsgId is int) {
-        if (msgRes.isNotEmpty) {
-          final pMsgInfo = msgRes['pMsgInfo'][tripMsgId];
-          spec.nTotalTripName = pMsgInfo['nTotTitle'];
-          for (int nCnt = 0; nCnt < pMsgInfo['nTotTitle']; nCnt++) {
-            spec.tripNameList.add(pMsgInfo['pTitle'][nCnt]);
-          }
+      final tripMsgIdRaw = currentTrip['Message::id'];
+      int? tripMsgId = 0;
+      if (tripMsgIdRaw != null && tripMsgIdRaw is int) {
+        tripMsgId = tripMsgIdRaw;
+      }
+
+      // print('SpecFromJson::tripSpec()  3 $tripMsgIdRaw, $tripMsgId');
+      if (msgRes.isNotEmpty) {
+        final pMsgInfo = msgRes['pMsgInfo'][tripMsgId];
+        //spec.nTotalTripName = pMsgInfo['nTotTitle'];
+
+        final titles = pMsgInfo['pTitle'] as List<String>;
+        for (var title in titles) {
+          spec.tripNameList.add(title);
         }
+        spec.nTotalTripName = spec.tripNameList.length;
       }
 
       // LoadSpecTripCurWarn
@@ -1483,30 +1536,50 @@ class SpecFromJson {
       if (warnInfoData is List) {
         spec.nTotalWarnInfo = warnInfoData.length;
         for (var element in warnInfoData) {
-          final info = statusInfoHash[element['StatusInfo::id']];
-          if (info.isNotEmpty) {
-            Map<String, dynamic> map = {
-              'nCommAddr': _parseHexAddress(element['CommAddr'].toString()),
-              'strName': info['strName'],
-              'nDataType': info['nDataType'],
-              'nPointMsg': info['nPoint'],
-              'strUnit': info['strUnit']
-            };
-            spec.warnInfoDataList.add(map);
+          final statusInfoId = element['StatusInfo::id'];
+          int? statusInfoIndex;
+
+          if (statusInfoId is int) {
+            statusInfoIndex = statusInfoId;
+          } else if (statusInfoId is String) {
+            statusInfoIndex = int.tryParse(statusInfoId);
+          }
+
+          if (statusInfoIndex != null &&
+              statusInfoIndex >= 0 &&
+              statusInfoIndex < statusInfoHash.length) {
+            final info = statusInfoHash[statusInfoIndex];
+            if (info.isNotEmpty) {
+              Map<String, dynamic> map = {
+                'nCommAddr': _parseHexAddress(element['CommAddr'].toString()),
+                'strName': info['strName'],
+                'nDataType': info['nDataType'],
+                'nPointMsg': info['nPoint'],
+                'strUnit': info['strUnit']
+              };
+              spec.warnInfoDataList.add(map);
+            }
+          } else {
+            print('TripSpec: StatusInfo::id 변환 실패: $statusInfoId');
           }
         }
       }
 
       spec.warnNameList.clear();
-      final warnMsgId = currentWarning['Message::id'];
-      if (warnMsgId != null && warnMsgId is int) {
-        if (msgRes.isNotEmpty) {
-          final pMsgInfo = msgRes['pMsgInfo'][warnMsgId];
-          spec.nTotalWarnName = pMsgInfo['nTotTitle'];
-          for (int nCnt = 0; nCnt < pMsgInfo['nTotTitle']; nCnt++) {
-            spec.warnNameList.add(pMsgInfo['pTitle'][nCnt]);
-          }
+      final warnMsgIdRaw = currentWarning['Message::id'];
+      int warnMsgId = 0;
+      if (warnMsgIdRaw != null && tripMsgIdRaw is int) {
+        warnMsgId = warnMsgIdRaw;
+      }
+
+      if (msgRes.isNotEmpty) {
+        final pMsgInfo = msgRes['pMsgInfo'][warnMsgId];
+        //spec.nTotalWarnName = pMsgInfo['nTotTitle'];
+        final titles = pMsgInfo['pTitle'] as List<String>;
+        for (var title in titles) {
+          spec.warnNameList.add(title);
         }
+        spec.nTotalWarnName = spec.warnNameList.length;
       }
 
       // not implimented
@@ -1515,28 +1588,44 @@ class SpecFromJson {
       // if (tripHistory == null) {
       //   throw 'parse error: LoadSpecTripHistory';
       // }
+
+      result = {
+        'nTotalTripName': spec.nTotalTripName,
+        'nFirstTripNameAddr': spec.nFirstTripNameAddr,
+        'nCurTotalTrip': spec.nCurTotalTrip,
+        'nTotalTripInfo': spec.nTotalTripInfo,
+        'nTotalWarnName': spec.nTotalWarnName,
+        'nFirstWarnNameAddr': spec.nFirstWarnNameAddr,
+        'nCurTotalWarn': spec.nCurTotalWarn,
+        'nTotalWarnInfo': spec.nTotalWarnInfo,
+        'pTripName': spec.tripNameList,
+        'pWarnName': spec.warnNameList,
+        'pTripAddr': spec.tripAddrList,
+        'pWarnAddr': spec.warnAddrList,
+        'pTripInfoData': spec.tripInfoDataList,
+        'pWarnInfoData': spec.warnInfoDataList,
+      };
     } catch (e) {
       print('TripSpec JSON 파싱 중 오류 발생: $e');
       return result;
     }
 
+    // print(' - nTotalTripName: ${spec.nTotalTripName}');
+    // print(' - nFirstTripNameAddr: ${spec.nFirstTripNameAddr}');
+    // print(' - nCurTotalTrip: ${spec.nCurTotalTrip}');
+    // print(' - nTotalTripInfo: ${spec.nTotalTripInfo}');
+    // print(' - nTotalWarnName: ${spec.nTotalWarnName}');
+    // print(' - nFirstWarnNameAddr: ${spec.nFirstWarnNameAddr}');
+    // print(' - nCurTotalWarn: ${spec.nCurTotalWarn}');
+    // print(' - nTotalWarnInfo: ${spec.nTotalWarnInfo}');
+    // print('   - pTripName: ${spec.tripNameList}');
+    // print('   - pWarnName: ${spec.warnNameList}');
+    // print('   - pTripAddr: ${spec.tripAddrList}');
+    // print('   - pWarnAddr: ${spec.warnAddrList}');
+    // print('   - pWarnAddr: ${spec.tripInfoDataList}');
+    // print('   - pWarnInfoData: ${spec.warnInfoDataList}');
+
     return result;
-    // return {
-    //   'nTotalTripName': nTotalTripName,
-    //   'nFirstTripNameAddr': nFirstTripNameAddr,
-    //   'nCurTotalTrip': nCurTotalTrip,
-    //   'nTotalTripInfo': nTotalTripInfo,
-    //   'nTotalWarnName': nTotalWarnName,
-    //   'nFirstWarnNameAddr': nFirstWarnNameAddr,
-    //   'nCurTotalWarn': nCurTotalWarn,
-    //   'nTotalWarnInfo': nTotalWarnInfo,
-    //   'pTripName': tripNameList,
-    //   'pWarnName': warnNameList,
-    //   'pTripAddr': tripAddrList,
-    //   'pWarnAddr': warnAddrList,
-    //   'pTripInfoData': tripInfoDataList,
-    //   'pWarnInfoData': warnInfoDataList,
-    // };
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -1549,6 +1638,10 @@ class SpecFromJson {
       spec.nTotalMsg = 0;
       spec.msgInfoList.clear();
     }
+
+    // print(' - nTotalMsg: ${spec.nTotalMsg}');
+    // print(' - pMsgInfo: ${spec.msgInfoList}');
+
     return result;
   }
 
@@ -1562,32 +1655,31 @@ class SpecFromJson {
         throw 'parse error: LoadSpecTrips';
       }
 
-      Map<int, String> units = unitsFromJson();
       spec.commonInfoList.clear();
-      if (parser is List) {
-        int nPointMsg = 0;
-        for (var element in parser) {
-          nPointMsg = element['Point16'];
-          final msgId = element['Message::id'];
-          if (msgId != null && msgId is int) {
-            nPointMsg = msgId;
-          }
+      spec.nTotCommonNo = parser.length;
 
-          Map<String, dynamic> map = {
-            'nCommAddr': _parseHexAddress(element['CommAddr']),
-            'strName': makeTitleWithAtValue(
-                mapTitle?[element['Title::id']] ?? '',
-                element['AtValue'] ?? ''),
-            'nDefault': element['Def'],
-            'nMax': element['Max'],
-            'nMin': element['Min'],
-            'nDataType': element['DataType'],
-            'nPointMsg': nPointMsg,
-            'strUnit': units[element['Unit::id']],
-            'nAttribute': _parseHexAddress(element['Attr'])
-          };
-          spec.commonInfoList.add(map);
+      Map<int, String> units = unitsFromJson();
+
+      for (var element in parser) {
+        int nPointMsg = element['Point32'] ?? 0;
+        final msgId = element['Message::id'];
+        if (msgId != null && msgId is int) {
+          nPointMsg = msgId;
         }
+        Map<String, dynamic> map = {
+          'nCodeNum': element['CodeNum'],
+          'nCommAddr': _parseHexAddress(element['CommAddr']),
+          'strName': makeTitleWithAtValue(
+              mapTitle?[element['Title::id']] ?? '', element['AtValue'] ?? ''),
+          'nDefault': element['Def'],
+          'nMax': element['Max'],
+          'nMin': element['Min'],
+          'nDataType': element['DataType'],
+          'nPointMsg': nPointMsg,
+          'strUnit': units[element['Unit::id']] ?? '',
+          'nAttribute': _parseHexAddress(element['Attr'])
+        };
+        spec.commonInfoList.add(map);
       }
       result = {
         'nTotCommonNo': spec.commonInfoList.length,
@@ -1597,6 +1689,10 @@ class SpecFromJson {
       print('CommonSpec JSON 파싱 중 오류 발생: $e');
       return result;
     }
+
+    // print(' - nTotCommonNo: ${spec.nTotCommonNo}');
+    // print(' - pCommonInfo: ${spec.commonInfoList}');
+
     return result;
   }
 
@@ -1615,21 +1711,59 @@ class SpecFromJson {
 
       int nTotParm = 0;
       Map<String, dynamic> paramMap = {};
+      Map<int, String> units = unitsFromJson();
 
       for (var group in parser) {
-        paramMap = {
+        Map<String, dynamic> paramMap = {
           'nGrpNum': group['GroupNum'],
           'strGrpName':
               (mapTitle?[group['Title::id']] ?? '').replaceAll(' Group', ''),
           'nAttribute': _parseHexAddress(group['GroupAttr']),
           'nTotParm': group['Parameters'].length,
         };
-        nTotParm = paramMap['nTotParm'];
+        final paramList = group['Parameters'];
+        List<Map<String, dynamic>> parmTypeList = [];
+        if (paramList != null && paramList is List) {
+          for (var element in paramList) {
+            int nPointMsg = element['Point32'] ?? 0;
+            final msgId = element['Message::id'];
+            if (msgId != null && msgId is int) {
+              nPointMsg = msgId;
+            }
+            Map<String, dynamic> typeMap = {
+              'nCodeNum': element['CodeNum'],
+              'strNameHz': makeTitleWithAtValue(
+                  mapTitle?[element['Title::id']] ?? '',
+                  element['AtValue'] ?? ''),
+              'strNameRpm': makeTitleWithAtValue(
+                  mapTitle?[element['Title::id']] ?? '',
+                  element['AtValue'] ?? ''),
+              'nDefault': element['Def'],
+              'nMax': element['Max'],
+              'nMin': element['Min'],
+              'nDataType': element['DataType'],
+              'nPointMsg': nPointMsg,
+              'strUnit': units[element['Unit::id']] ?? '',
+              'nAttribute': _parseHexAddress(element['Attr'])
+            };
+            parmTypeList.add(typeMap);
+          }
+        }
+        spec.parmGrpList.add({'GrpInfo': paramMap, 'pParmType': parmTypeList});
       }
+      spec.nTotGroup = spec.parmGrpList.length;
+      result = {
+        'nTotGroup': spec.nTotGroup,
+        'pGrpInfo': spec.parmGrpList,
+      };
     } catch (e) {
       print('ParameterSpec JSON 파싱 중 오류 발생: $e');
       return result;
     }
+
+    // print(' - nTotGroup: ${spec.nTotGroup}');
+    // print(' - pParmGrp: ${spec.parmGrpList}');
+
     return result;
   }
 
@@ -1659,9 +1793,9 @@ class SpecFromJson {
           final id = element['id'];
           final text = element['Text'];
 
-          //print('TitleFromJson::titles() - id: $id, text: $text');
-
-          mapUnits[id] = text;
+          if (id != null && text != null) {
+            mapUnits[id] = text.toString();
+          }
         }
       }
     } catch (e) {

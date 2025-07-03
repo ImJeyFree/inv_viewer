@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 
-import 'pole.dart';
+//import 'pole.dart';
+import 'poleEx.dart';
 import 'device_inv.dart';
 
 class FileContentPage extends StatefulWidget {
-  final String fileName;
+  //String fileName = 'assets/DataFile/LSIS/G100/G100_3_10.INV';
+  final String? fileName;
   final Storage? storage;
-  const FileContentPage({super.key, required this.fileName, this.storage});
+  const FileContentPage({super.key, this.fileName, this.storage});
 
   @override
   State<FileContentPage> createState() => _FileContentPageState();
@@ -18,25 +20,29 @@ class _FileContentPageState extends State<FileContentPage> {
   bool loading = true;
   String? error;
   Map<String, dynamic>? invData;
+  String fileName = '';
 
   @override
   void initState() {
     super.initState();
+    fileName = widget.fileName!;
+
     // 파일명 없거나 확장자 .inv/.INV가 아니면 예외 처리
-    if (widget.fileName.isEmpty ||
-        !(widget.fileName.toLowerCase().endsWith('.inv'))) {
+    if (widget.fileName!.isEmpty ||
+        !(widget.fileName!.toLowerCase().endsWith('.inv'))) {
       setState(() {
         loading = false;
         error = '지원하지 않는 파일입니다: ${widget.fileName}';
       });
       return;
     }
+
     // print('FileContentPage::initState() - ');
     _loadFile();
   }
 
   Future<void> _loadFile() async {
-    // print('FileContentPage::_loadFile() - ${widget.fileName}');
+    print('FileContentPage::_loadFile() - ${widget.fileName}');
     try {
       setState(() {
         loading = true;
@@ -44,26 +50,32 @@ class _FileContentPageState extends State<FileContentPage> {
       });
 
       // print('FileContentPage::_loadFile() - storage create');
-      Storage storage = widget.storage ?? Storage(fileName: widget.fileName);
+      //Storage storage = widget.storage ?? Storage(fileName: fileName);
+
+      fileName = 'assets/DataFile/LSIS/G100/G100_1_30.INV';
+      Storage storage =
+          widget.storage ?? Storage(fileName: fileName, isAssets: true);
+
       if (widget.storage == null) {
         bool res = await storage.open();
         // print('FileContentPage::_loadFile() - storage.open() end');
         if (!res) {
           print(
-              'FileContentPage::_loadFile() - storage.open() : Storage open failed !!!');
-          throw Exception('Storage open failed');
+              'FileContentPage::_loadFile() - storage.open() : Storage open failed !!! $fileName');
+          throw Exception('Storage open failed !!! $fileName');
         } else {
           // print('FileContentPage::_loadFile() - storage.open() : success !!!');
         }
       }
 
       // INV 파일인지 확인
-      if (widget.fileName.toLowerCase().endsWith('.inv')) {
+      if (fileName.toLowerCase().endsWith('.inv')) {
         invData = await parseINVData(storage);
         entries = await readINV(storage);
       } else {
         entries = await _visit(0, storage, '');
       }
+      // entries = await _visit(0, storage, '');
 
       setState(() {
         loading = false;
@@ -83,7 +95,7 @@ class _FileContentPageState extends State<FileContentPage> {
   }
 
   Future<Map<String, dynamic>> parseINVData(Storage storage) async {
-    // print('FileContentPage::parseINVData() - ');
+    print('FileContentPage::parseINVData() - ');
 
     Map<String, dynamic> result = {};
 
@@ -163,7 +175,7 @@ class _FileContentPageState extends State<FileContentPage> {
   }
 
   Future<List<String>> readINV(Storage storage) async {
-    // print('FileContentPage::readINV() - ');
+    print('FileContentPage::readINV() - ');
 
     List<String> result = [];
 
@@ -192,19 +204,19 @@ class _FileContentPageState extends State<FileContentPage> {
   }
 
   Future<List<String>> readDeviceSpec(Storage storage) async {
-    // print('FileContentPage::readDeviceSpec() - ');
+    print('FileContentPage::readDeviceSpec() - ');
 
     List<String> result = [];
 
     DeviceSpec spec = DeviceSpec(storage);
-    //final res = await spec.parse();
+    final res = await spec.parse();
 
-    SpecFromJson specJson = SpecFromJson();
-    // specJson
-    //     .loadFile('C:\\workspace\\flutter\\inv_viewer\\assets\\S300_1_00.json');
-    specJson.loadAssets('assets/S300_1_00.json');
+    // SpecFromJson specJson = SpecFromJson();
+    // // specJson
+    // //     .loadFile('C:\\workspace\\flutter\\inv_viewer\\assets\\S300_1_00.json');
+    // specJson.loadAssets('assets/DataFile/LSIS/S300/S300_1_00.json');
 
-    final res = specJson.deviceSpec(spec);
+    // final res = specJson.deviceSpec(spec);
 
     result.add('Parsed DeviceSpec:');
     result.add('  strDataFileVer: ${res['strDataFileVer']}');
@@ -358,7 +370,7 @@ class _FileContentPageState extends State<FileContentPage> {
           child: Row(
             children: [
               Text(
-                widget.fileName.split(Platform.pathSeparator).last,
+                widget.fileName!.split(Platform.pathSeparator).last,
                 overflow: TextOverflow.ellipsis,
               ),
               if (invData != null) ...[
@@ -370,7 +382,7 @@ class _FileContentPageState extends State<FileContentPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => INVDataTablePage(
-                            invData: invData!, fileName: widget.fileName),
+                            invData: invData!, fileName: widget.fileName!),
                       ),
                     );
                   },

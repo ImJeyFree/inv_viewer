@@ -1,11 +1,11 @@
-import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'pole.dart';
+
+//import 'pole.dart';
+import 'poleEx.dart';
+
 import '../utils/string_utils.dart';
 
 //=================================================================================================
@@ -49,7 +49,7 @@ int _parseHexAddress(String hexString) {
 }
 
 String makeTitleWithAtValue(String strTitle, String strAtValue) {
-  return StringUtils.makeTitleWithAtValue(strTitle, strAtValue);
+  return Utils.makeTitleWithAtValue(strTitle, strAtValue);
 }
 
 //=================================================================================================
@@ -91,6 +91,7 @@ class DeviceSpec {
   Future<Map<String, dynamic>> parse() async {
     try {
       if (storage == null) {
+        print('DeviceSpec::parse() - storage is null');
         throw Exception('storage is null');
       }
       Stream stream = Stream(storage!, path);
@@ -101,14 +102,13 @@ class DeviceSpec {
       return parseData(buffer);
     } catch (e) {
       //steamSize = 0;
-      return {
-        'error': e.toString(),
-      };
+      return {'error': e.toString()};
     }
   }
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
   Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
+    print('DeviceSpec::parseData() - buffer.length: ${buffer.length} ');
     if (buffer.isNotEmpty) {
       int offset = 0;
       //final byteData = buffer.buffer.asByteData();
@@ -171,26 +171,26 @@ class DeviceSpec {
       }
     }
 
-    print('PATH: $path');
-    print(' - strDataFileVer: $strDataFileVer');
-    print(' - nInvModelNo: $nInvModelNo');
-    print(' - strInvModelName: $strInvModelName');
-    print(' - strInvSWVer: $strInvSWVer');
-    print(' - strInvCodeVer: $strInvCodeVer');
-    print(' - nCommOffset: $nCommOffset');
-    print(' - nTotalDiagNum: $nTotalDiagNum');
-    print('   - diagNumber: $diagNumList');
-    if (diagNumList.isNotEmpty) {
-      for (int i = 0; i < diagNumList.length; i++) {
-        print('     - diagNum[$i]: ${diagNumList[i]}');
-      }
-    }
-    print(' - nModelNoCommAddr: $nModelNoCommAddr');
-    print(' - nCodeVerCommAddr: $nCodeVerCommAddr');
-    print(' - nMotorStatusCommAddr: $nMotorStatusCommAddr');
-    print(' - nInvStatusCommAddr: $nInvStatusCommAddr');
-    print(' - nInvControlCommAddr: $nInvControlCommAddr');
-    print(' - nParameterSaveCommAddr: $nParameterSaveCommAddr');
+    // print('PATH: $path');
+    // print(' - strDataFileVer: $strDataFileVer');
+    // print(' - nInvModelNo: $nInvModelNo');
+    // print(' - strInvModelName: $strInvModelName');
+    // print(' - strInvSWVer: $strInvSWVer');
+    // print(' - strInvCodeVer: $strInvCodeVer');
+    // print(' - nCommOffset: $nCommOffset');
+    // print(' - nTotalDiagNum: $nTotalDiagNum');
+    // print('   - diagNumber: $diagNumList');
+    // if (diagNumList.isNotEmpty) {
+    //   for (int i = 0; i < diagNumList.length; i++) {
+    //     print('     - diagNum[$i]: ${diagNumList[i]}');
+    //   }
+    // }
+    // print(' - nModelNoCommAddr: $nModelNoCommAddr');
+    // print(' - nCodeVerCommAddr: $nCodeVerCommAddr');
+    // print(' - nMotorStatusCommAddr: $nMotorStatusCommAddr');
+    // print(' - nInvStatusCommAddr: $nInvStatusCommAddr');
+    // print(' - nInvControlCommAddr: $nInvControlCommAddr');
+    // print(' - nParameterSaveCommAddr: $nParameterSaveCommAddr');
 
     return {
       'strDataFileVer': strDataFileVer,
@@ -210,10 +210,7 @@ class DeviceSpec {
       'pDiagNumDetails': diagNumList
           .asMap()
           .entries
-          .map((entry) => {
-                'index': entry.key,
-                'value': entry.value,
-              })
+          .map((entry) => {'index': entry.key, 'value': entry.value})
           .toList(),
     };
   }
@@ -272,9 +269,7 @@ class IoSpec {
       return parseData(buffer);
     } catch (e) {
       //steamSize = 0;
-      return {
-        'error': e.toString(),
-      };
+      return {'error': e.toString()};
     }
   }
 
@@ -366,7 +361,7 @@ class IoSpec {
     // print(' - nAddInputStatus: $nAddInputStatus');
     // print(' - nAddOutputStatus: $nAddOutputStatus');
     // print('   - pInputTermInfo: $inputTermInfoList');
-    // print('   - pOutputTermInfo: $outputTerminalInfoList');
+    // print('   - pOutputTermInfo: $outputTermInfoList');
     // print('   - pInputFuncMsg: $inputFuncMsgList');
     // print('   - pOutputFuncMsgTitle: $outputFuncMsgList');
 
@@ -445,9 +440,7 @@ class TripSpec {
       return parseData(buffer);
     } catch (e) {
       //steamSize = 0;
-      return {
-        'error': e.toString(),
-      };
+      return {'error': e.toString()};
     }
   }
 
@@ -626,9 +619,7 @@ class MsgSpec {
       return parseData(buffer);
     } catch (e) {
       //steamSize = 0;
-      return {
-        'error': e.toString(),
-      };
+      return {'error': e.toString()};
     }
   }
 
@@ -672,10 +663,7 @@ class MsgSpec {
     // print(' - nTotalMsg: $nTotalMsg');
     // print(' - pMsgInfo: $msgInfoList');
 
-    return {
-      'nTotalMsg': nTotalMsg,
-      'pMsgInfo': msgInfoList,
-    };
+    return {'nTotalMsg': nTotalMsg, 'pMsgInfo': msgInfoList};
   }
 }
 
@@ -714,9 +702,7 @@ class CommonSpec {
       return parseData(buffer);
     } catch (e) {
       //steamSize = 0;
-      return {
-        'error': e.toString(),
-      };
+      return {'error': e.toString()};
     }
   }
 
@@ -753,10 +739,7 @@ class CommonSpec {
     // print(' - nTotCommonNo: $nTotCommonNo');
     // print(' - pCommonInfo: $commonInfoList');
 
-    return {
-      'nTotCommonNo': nTotCommonNo,
-      'pCommonInfo': commonInfoList,
-    };
+    return {'nTotCommonNo': nTotCommonNo, 'pCommonInfo': commonInfoList};
   }
 }
 
@@ -798,9 +781,7 @@ class ParameterSpec {
       return parseData(buffer);
     } catch (e) {
       //steamSize = 0;
-      return {
-        'error': e.toString(),
-      };
+      return {'error': e.toString()};
     }
   }
 
@@ -886,10 +867,7 @@ class ParameterSpec {
     //print(' - nTotGroup: $nTotGroup');
     //print(' - pParmGrp: $parmGrpList');
 
-    return {
-      'nTotGroup': nTotGroup,
-      'pParmGrp': parmGrpList,
-    };
+    return {'nTotGroup': nTotGroup, 'pParmGrp': parmGrpList};
   }
 }
 
@@ -928,9 +906,7 @@ class InitOrder {
       return parseData(buffer);
     } catch (e) {
       //steamSize = 0;
-      return {
-        'error': e.toString(),
-      };
+      return {'error': e.toString()};
     }
   }
 
@@ -955,10 +931,7 @@ class InitOrder {
     // print('PATH: $path');
     // print(' - nTotInitOder: $nTotInitOder');
 
-    return {
-      'nTotInitOder': nTotInitOder,
-      'pOrderAddr': orderAddrList,
-    };
+    return {'nTotInitOder': nTotInitOder, 'pOrderAddr': orderAddrList};
   }
 }
 
@@ -1055,6 +1028,15 @@ class SpecFromJson {
     if (index != -1) {
       final fileNameWithoutExt = filePath.substring(0, index);
       return '${fileNameWithoutExt}_Title.json'; // 'S300_1_00_Title.json'
+      // if (Platform.isWindows) {
+      //   final fileNameWithoutExt = filePath.substring(0, index);
+      //   return '${fileNameWithoutExt}_Title.json'; // 'S300_1_00_Title.json'
+      // } else {
+      //   final fileNameWithoutExt = filePath.substring(0, index);
+      //   final fileName = fileNameWithoutExt.split('/').last;
+      //   return 'assets/DataFile/LSIS/S300/${fileName}_Title.json'; // 'S300_1_00_Title.json'
+      //   //return 'assets/${fileName}_Title.json'; // 'S300_1_00_Title.json'
+      // }
     }
     return '';
   }
@@ -1096,7 +1078,8 @@ class SpecFromJson {
           //     'SpecFromJson::loadAssetsJson() - Title 파일 로드 성공: ${titleFromJson.mapTitle.length}개 항목');
         } else {
           print(
-              'SpecFromJson::loadAssetsJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath');
+            'SpecFromJson::loadAssetsJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath',
+          );
         }
       } else {
         print('SpecFromJson::loadAssetsJson() - Title 파일 없음 !!! $filePath');
@@ -1134,7 +1117,8 @@ class SpecFromJson {
           //     'SpecFromJson::loadJson() - Title 파일 로드 성공: ${titleFromJson.mapTitle.length}개 항목');
         } else {
           print(
-              'SpecFromJson::loadJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath');
+            'SpecFromJson::loadJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath',
+          );
         }
       } else {
         print('SpecFromJson::loadJson() - Title 파일 없음 !!! $filePath');
@@ -1154,7 +1138,7 @@ class SpecFromJson {
       //final DeviceSpec spec = DeviceSpec(null);
       final parser = jsonData['Device'];
       if (parser == null) {
-        throw 'parse error: LoadSpecTrips';
+        throw 'parse error: deviceSpec()';
       }
 
       spec.strDataFileVer = parser['DataFileVersion'] ?? '';
@@ -1164,17 +1148,22 @@ class SpecFromJson {
       spec.strInvCodeVer = parser['DataFileVersion'] ?? '';
       spec.nCommOffset = _parseHexAddress(parser['KeypadCommOffset16'] ?? '0');
       spec.nTotalDiagNum = 0; // ???
-      spec.nModelNoCommAddr =
-          _parseHexAddress(parser['ModelNoCommAddr'] ?? '0');
+      spec.nModelNoCommAddr = _parseHexAddress(
+        parser['ModelNoCommAddr'] ?? '0',
+      );
       spec.nCodeVerCommAddr = 0; // ???
-      spec.nMotorStatusCommAddr =
-          _parseHexAddress(parser['MotorStatusCommAddr'] ?? '0');
-      spec.nInvStatusCommAddr =
-          _parseHexAddress(parser['InvStatusCommAddr'] ?? '0');
-      spec.nInvControlCommAddr =
-          _parseHexAddress(parser['InvControlCommAddr'] ?? '0');
-      spec.nParameterSaveCommAddr =
-          _parseHexAddress(parser['ParaSaveCommAddr'] ?? '0');
+      spec.nMotorStatusCommAddr = _parseHexAddress(
+        parser['MotorStatusCommAddr'] ?? '0',
+      );
+      spec.nInvStatusCommAddr = _parseHexAddress(
+        parser['InvStatusCommAddr'] ?? '0',
+      );
+      spec.nInvControlCommAddr = _parseHexAddress(
+        parser['InvControlCommAddr'] ?? '0',
+      );
+      spec.nParameterSaveCommAddr = _parseHexAddress(
+        parser['ParaSaveCommAddr'] ?? '0',
+      );
 
       // diagNumList 설정
       spec.diagNumList.clear();
@@ -1231,7 +1220,7 @@ class SpecFromJson {
       //final IoSpec spec = IoSpec(null);
       final parser = jsonData['IO'];
       if (parser == null) {
-        throw 'parse error: LoadSpecTrips';
+        throw 'parse error: ioSpec()';
       }
 
       spec.inputTermInfoList.clear();
@@ -1403,7 +1392,7 @@ class SpecFromJson {
       //final TripSpec spec = TripSpec(null);
       final parser = jsonData['Trips'];
       if (parser == null) {
-        throw 'parse error: LoadSpecTrips';
+        throw 'parse error: tripSpec()';
       }
 
       Map<String, dynamic> msgRes = {};
@@ -1660,7 +1649,7 @@ class SpecFromJson {
       //final CommonSpec spec = CommonSpec(null);
       final parser = jsonData['CommonParameters'];
       if (parser == null) {
-        throw 'parse error: LoadSpecTrips';
+        throw 'parse error: commonSpec()';
       }
 
       spec.commonInfoList.clear();
@@ -1711,7 +1700,7 @@ class SpecFromJson {
       //final ParameterSpec spec = ParameterSpec(null);
       final parser = jsonData['ParameterGroups'];
       if (parser == null) {
-        throw 'parse error: LoadSpecTrips';
+        throw 'parse error: parameterSpec()';
       }
 
       spec.parmGrpList.clear();
@@ -1782,7 +1771,7 @@ class SpecFromJson {
       //final InitOrder spec = InitOrder(null);
       final parser = jsonData['InitOrder'];
       if (parser == null) {
-        throw 'parse error: LoadSpecTrips';
+        throw 'parse error: initOrder()';
       }
     } catch (e) {
       print('InitOrder JSON 파싱 중 오류 발생: $e');
@@ -1858,10 +1847,7 @@ class SpecFromJson {
         }
 
         //spec.nTotalMsg = parser.length;
-        result = {
-          'nTotalMsg': nTotalMsg,
-          'pMsgInfo': msgInfoList,
-        };
+        result = {'nTotalMsg': nTotalMsg, 'pMsgInfo': msgInfoList};
       }
     } catch (e) {
       print('MessageSpec JSON 파싱 중 오류 발생: $e');

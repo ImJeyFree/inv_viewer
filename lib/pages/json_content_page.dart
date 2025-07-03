@@ -29,7 +29,13 @@ class _JsonContentPageState extends State<JsonContentPage> {
     });
     try {
       final specFromJson = SpecFromJson();
-      final loaded = await specFromJson.loadFile(widget.filePath);
+      bool loaded = false;
+      if (Platform.isWindows) {
+        loaded = await specFromJson.loadFile(widget.filePath);
+      } else {
+        loaded = await specFromJson.loadAssets(widget.filePath);
+      }
+
       if (!loaded) {
         setState(() {
           error = 'SpecFromJson 파싱 실패';

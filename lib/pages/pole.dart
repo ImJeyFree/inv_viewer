@@ -4,8 +4,21 @@ import 'package:flutter/foundation.dart';
 
 //=================================================================================================
 // signature, or magic identifier
+//-------------------------------------------------------------------------------------------------
 final List<int> poleMagic = [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1];
+
+//=================================================================================================
+// Special block values
+//-------------------------------------------------------------------------------------------------
+final int poleEof = 0xffffffff; //-2;
+final int poleAvail = 0xfffffffe; //-1;
+final int poleBat = 0xfffffffd; //-3;
+final int poleMetaBat = 0xfffffffc; //-4;
+final int dirTreeEnd = 0xffffffff;
+
+//=================================================================================================
 // Default values
+//-------------------------------------------------------------------------------------------------
 final int signature = 0xE11AB1A1E011CFD0;
 final int version = 0x3E; // 62
 final int sectorSize = 0x200; // 512
@@ -15,15 +28,11 @@ final int maxBbatCount = 0x80; // 128
 final int maxSbatCount = 0x80; // 128
 final int initialBlockSize = 0x80; // 128
 final int maxSmallBlockSize = 0x100; // 256
-// Special block values
-final int poleEof = 0xffffffff; //-2;
-final int poleAvail = 0xfffffffe; //-1;
-final int poleBat = 0xfffffffd; //-3;
-final int poleMetaBat = 0xfffffffc; //-4;
-final int dirTreeEnd = 0xffffffff;
 
-final int poleCACHEBUFSIZE =
-    4096; //a presumably reasonable size for the read cache
+//=================================================================================================
+// a presumably reasonable size for the read cache
+//-------------------------------------------------------------------------------------------------
+final int poleCACHEBUFSIZE = 4096;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -119,6 +128,7 @@ class Header {
   int numSbat = 0; // blocks allocated for small bat
   int mbatStart = 0; // starting block to store meta bat
   int numMbat = 0; // blocks allocated for meta bat
+
   final List<int> bbBlocks = List.filled(109, poleAvail);
   bool dirty = false; // Needs to be written
 
@@ -841,12 +851,12 @@ class DirTree {
     return 0;
   }
 
-  void load(Uint8List buffer, int len) {
+  void load(Uint8List buffer, int size) {
     // print('DirEntry::load() - buffer.length: ${buffer.length}, len: $len');
 
     entries.clear();
 
-    int maxEntries = len ~/ 128;
+    int maxEntries = size ~/ 128;
     //entries.length = maxEntries;
 
     for (int i = 0; i < maxEntries; i++) {
@@ -1173,9 +1183,9 @@ class StorageIO {
     // print('StorageIO::close() - opened: $opened');
     if (opened) {
       await raf.close();
-      streams.clear();
-      opened = false;
     }
+    streams.clear();
+    opened = false;
   }
 
   void init() {

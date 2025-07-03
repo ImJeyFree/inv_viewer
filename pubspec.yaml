@@ -65,8 +65,14 @@ flutter:
     # - assets/S300_1_00_Title.json
     # - assets/S300_1_01.json
     # - assets/S300_1_01_Title.json
+    - assets/DataFile/LSIS/G100/G100_1_00.inv
+    - assets/DataFile/LSIS/G100/G100_1_10.INV
+    - assets/DataFile/LSIS/G100/G100_1_30.INV
+    - assets/DataFile/LSIS/G100/G100_1_40.INV
     - assets/DataFile/LSIS/S300/S300_1_00.json
     - assets/DataFile/LSIS/S300/S300_1_00_Title.json
+    - assets/DataFile/LSIS/S300/S300_1_01.json
+    - assets/DataFile/LSIS/S300/S300_1_01_Title.json
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg
 

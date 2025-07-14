@@ -1,6 +1,8 @@
-import 'dart:convert';
+// ignore_for_file: file_names, constant_identifier_names, camel_case_types, unused_element, library_private_types_in_public_api, non_constant_identifier_names
 import 'dart:io';
+import 'dart:convert';
 
+import 'package:flutter/foundation.dart'; // kDebugMode
 import 'package:flutter/services.dart';
 
 //import 'pole.dart';
@@ -9,15 +11,13 @@ import 'poleEx.dart';
 import '../utils/string_utils.dart';
 
 //=================================================================================================
-// Ref : docs\src\DriveView 9\include\DataFileDefine.h
-//-------------------------------------------------------------------------------------------------
 
 //=================================================================================================
-// 크기 상수
+// 크기 상수 : Ref docs\src\DriveView 9\include\DataFileDefine.h
 //-------------------------------------------------------------------------------------------------
-const int dmdfTitleSize = 30; // DMDF_TITLE_SIZE
-const int dmdfUnitSize = 10; // DMDF_UNIT_SIZE
-const int dmdfSmallSize = 10; // DMDF_SMALL_SIZE
+const int DMDF_TITLE_SIZE = 30;
+const int DMDF_UNIT_SIZE = 10;
+const int DMDF_SMALL_SIZE = 10;
 
 //=================================================================================================
 int _readU32(Uint8List buffer, int offset) {
@@ -91,15 +91,14 @@ class DeviceSpec {
   Future<Map<String, dynamic>> parse() async {
     try {
       if (storage == null) {
-        print('DeviceSpec::parse() - storage is null');
         throw Exception('storage is null');
       }
       Stream stream = Stream(storage!, path);
       //steamSize = stream.size();
       // DeviceInfo 구조체 크기만큼 바이트 배열로 읽기
       final buffer = Uint8List(size);
-      await stream.read(buffer, size);
-      return parseData(buffer);
+      stream.read(buffer, size);
+      return _parseData(buffer);
     } catch (e) {
       //steamSize = 0;
       return {'error': e.toString()};
@@ -107,16 +106,15 @@ class DeviceSpec {
   }
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
-  Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
-    print('DeviceSpec::parseData() - buffer.length: ${buffer.length} ');
+  Future<Map<String, dynamic>> _parseData(Uint8List buffer) async {
     if (buffer.isNotEmpty) {
       int offset = 0;
       //final byteData = buffer.buffer.asByteData();
 
       // strDataFileVer (10 bytes)
-      strDataFileVer = _readString(buffer, offset, dmdfSmallSize);
-      //_readArray(strDataFileVer, buffer, offset, dmdfSmallSize);
-      offset += dmdfSmallSize;
+      strDataFileVer = _readString(buffer, offset, DMDF_SMALL_SIZE);
+      //_readArray(strDataFileVer, buffer, offset, DMDF_SMALL_SIZE);
+      offset += DMDF_SMALL_SIZE;
       offset += 2; // because padding
 
       // nInvModelNo (4 bytes)
@@ -125,17 +123,17 @@ class DeviceSpec {
       offset += 4;
 
       // strInvModelName (30 bytes)
-      strInvModelName = _readString(buffer, offset, dmdfTitleSize);
-      offset += dmdfTitleSize;
+      strInvModelName = _readString(buffer, offset, DMDF_TITLE_SIZE);
+      offset += DMDF_TITLE_SIZE;
       //offset += 2; // because padding
 
       // strInvSWVer (10 bytes)
-      strInvSWVer = _readString(buffer, offset, dmdfSmallSize);
-      offset += dmdfSmallSize;
+      strInvSWVer = _readString(buffer, offset, DMDF_SMALL_SIZE);
+      offset += DMDF_SMALL_SIZE;
 
       // strInvCodeVer (10 bytes)
-      strInvCodeVer = _readString(buffer, offset, dmdfSmallSize);
-      offset += dmdfSmallSize;
+      strInvCodeVer = _readString(buffer, offset, DMDF_SMALL_SIZE);
+      offset += DMDF_SMALL_SIZE;
       offset += 2; // because padding
 
       // 나머지 정수 필드들 (각각 4 bytes)
@@ -266,7 +264,7 @@ class IoSpec {
       // IoInfo 구조체 크기만큼 바이트 배열로 읽기
       final buffer = Uint8List(size);
       await stream.read(buffer, size);
-      return parseData(buffer);
+      return _parseData(buffer);
     } catch (e) {
       //steamSize = 0;
       return {'error': e.toString()};
@@ -274,7 +272,7 @@ class IoSpec {
   }
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
-  Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
+  Future<Map<String, dynamic>> _parseData(Uint8List buffer) async {
     int offset = 0;
     //final byteData = buffer.buffer.asByteData();
 
@@ -312,7 +310,7 @@ class IoSpec {
             if (await stream.read(temp, terminalInfoSize) > 0) {
               Map<String, dynamic> map = {
                 'strName': _readString(temp, 0, 30),
-                'nCommAddr': _readU32(temp, 32)
+                'nCommAddr': _readU32(temp, 32),
               };
               inputTermInfoList.add(map);
             }
@@ -321,7 +319,7 @@ class IoSpec {
             if (await stream.read(temp, terminalInfoSize) > 0) {
               Map<String, dynamic> map = {
                 'strName': _readString(temp, 0, 30),
-                'nCommAddr': _readU32(temp, 32)
+                'nCommAddr': _readU32(temp, 32),
               };
               outputTermInfoList.add(map);
             }
@@ -437,7 +435,7 @@ class TripSpec {
       // 구조체 크기만큼 바이트 배열로 읽기
       final buffer = Uint8List(size);
       await stream.read(buffer, size);
-      return parseData(buffer);
+      return _parseData(buffer);
     } catch (e) {
       //steamSize = 0;
       return {'error': e.toString()};
@@ -445,7 +443,7 @@ class TripSpec {
   }
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
-  Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
+  Future<Map<String, dynamic>> _parseData(Uint8List buffer) async {
     int offset = 0;
     //final byteData = buffer.buffer.asByteData();
 
@@ -524,7 +522,7 @@ class TripSpec {
                 'strName': _readString(temp, 4, 30), // 30+2
                 'nDataType': _readU32(temp, 36), // 4
                 'nPointMsg': _readU32(temp, 40), // 4
-                'strUnit': _readString(temp, 44, 10) // 10+2
+                'strUnit': _readString(temp, 44, 10), // 10+2
               };
               tripInfoDataList.add(map);
             }
@@ -536,7 +534,7 @@ class TripSpec {
                 'strName': _readString(temp, 4, 30), // 30+2
                 'nDataType': _readU32(temp, 36), // 4
                 'nPointMsg': _readU32(temp, 40), // 4
-                'strUnit': _readString(temp, 44, 10) // 10+2
+                'strUnit': _readString(temp, 44, 10), // 10+2
               };
               warnInfoDataList.add(map);
             }
@@ -616,7 +614,7 @@ class MsgSpec {
       // 구조체 크기만큼 바이트 배열로 읽기
       final buffer = Uint8List(size);
       await stream.read(buffer, size);
-      return parseData(buffer);
+      return _parseData(buffer);
     } catch (e) {
       //steamSize = 0;
       return {'error': e.toString()};
@@ -624,7 +622,7 @@ class MsgSpec {
   }
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
-  Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
+  Future<Map<String, dynamic>> _parseData(Uint8List buffer) async {
     nTotalMsg = 0;
     msgInfoList.clear();
 
@@ -651,7 +649,7 @@ class MsgSpec {
 
               Map<String, dynamic> map = {
                 'nTotTitle': '$msgTitleNum',
-                'pTitle': msgTitleList
+                'pTitle': msgTitleList,
               };
               msgInfoList.add(map);
             }
@@ -698,8 +696,8 @@ class CommonSpec {
       //steamSize = stream.size();
       // 구조체 크기만큼 바이트 배열로 읽기
       final buffer = Uint8List(size);
-      await stream.read(buffer, size);
-      return parseData(buffer);
+      stream.read(buffer, size);
+      return _parseData(buffer);
     } catch (e) {
       //steamSize = 0;
       return {'error': e.toString()};
@@ -707,7 +705,7 @@ class CommonSpec {
   }
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
-  Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
+  Future<Map<String, dynamic>> _parseData(Uint8List buffer) async {
     commonInfoList.clear();
     nTotCommonNo = 0;
 
@@ -727,7 +725,7 @@ class CommonSpec {
               'nDataType': _readU32(temp, 48),
               'nPointMsg': _readU32(temp, 52),
               'strUnit': _readString(temp, 56, 10), // 10+2
-              'nAttribute': _readU32(temp, 68)
+              'nAttribute': _readU32(temp, 68),
             };
             commonInfoList.add(map);
           }
@@ -777,8 +775,8 @@ class ParameterSpec {
       //steamSize = stream.size();
       // 구조체 크기만큼 바이트 배열로 읽기
       final buffer = Uint8List(size);
-      await stream.read(buffer, size);
-      return parseData(buffer);
+      stream.read(buffer, size);
+      return _parseData(buffer);
     } catch (e) {
       //steamSize = 0;
       return {'error': e.toString()};
@@ -786,7 +784,7 @@ class ParameterSpec {
   }
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
-  Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
+  Future<Map<String, dynamic>> _parseData(Uint8List buffer) async {
     parmGrpList.clear();
     nTotGroup = 0;
 
@@ -796,14 +794,14 @@ class ParameterSpec {
         final infoButter = Uint8List(groupInfoSize);
         final parmButter = Uint8List(parameterSize);
 
-        //print('ParameterSpec::parseData() - nTotGroup: $nTotGroup');
+        //print('ParameterSpec::_parseData() - nTotGroup: $nTotGroup');
 
         for (int i = 0; i < nTotGroup; i++) {
           final groupInfoPath = '/Parameter Spec/Group-$i/Group Info';
           final parameterPath = '/Parameter Spec/Group-$i/Parameter';
 
-          //print('ParameterSpec::parseData() - groupInfoPath: $groupInfoPath');
-          //print('ParameterSpec::parseData() - parameterPath: $parameterPath');
+          //print('ParameterSpec::_parseData() - groupInfoPath: $groupInfoPath');
+          //print('ParameterSpec::_parseData() - parameterPath: $parameterPath');
 
           Stream groupInfoStream = Stream(storage!, groupInfoPath);
           Stream parameterStream = Stream(storage!, parameterPath);
@@ -827,7 +825,7 @@ class ParameterSpec {
               //   'GrpInfo': map,
               // });
             }
-            //print('ParameterSpec::parseData() - nTotParm: $nTotParm');
+            //print('ParameterSpec::_parseData() - nTotParm: $nTotParm');
             //print('paramMap -$paramMap');
 
             List<Map<String, dynamic>> parmTypeList = [];
@@ -843,7 +841,7 @@ class ParameterSpec {
                   'nDataType': _readU32(parmButter, 76),
                   'nPointMsg': _readU32(parmButter, 80),
                   'strUnit': _readString(parmButter, 84, 10), // 10+2
-                  'nAttribute': _readU32(parmButter, 96)
+                  'nAttribute': _readU32(parmButter, 96),
                 };
                 parmTypeList.add(typeMap);
               }
@@ -855,7 +853,7 @@ class ParameterSpec {
 
             Map<String, dynamic> grpParamMap = {
               'GrpInfo': paramMap,
-              'pParmType': parmTypeList
+              'pParmType': parmTypeList,
             };
             parmGrpList.add(grpParamMap);
           }
@@ -902,8 +900,8 @@ class InitOrder {
       //steamSize = stream.size();
       // 구조체 크기만큼 바이트 배열로 읽기
       final buffer = Uint8List(size);
-      await stream.read(buffer, size);
-      return parseData(buffer);
+      stream.read(buffer, size);
+      return _parseData(buffer);
     } catch (e) {
       //steamSize = 0;
       return {'error': e.toString()};
@@ -911,7 +909,7 @@ class InitOrder {
   }
 
   // 바이트 배열을 파싱하는 헬퍼 메서드
-  Future<Map<String, dynamic>> parseData(Uint8List buffer) async {
+  Future<Map<String, dynamic>> _parseData(Uint8List buffer) async {
     orderAddrList.clear();
     nTotInitOder = 0;
 
@@ -921,7 +919,7 @@ class InitOrder {
         Stream stream = Stream(storage!, initOrderParaAddrPath);
         final temp = Uint8List(initOrderParaAddrSize);
         for (int i = 0; i < nTotInitOder; i++) {
-          if (await stream.read(temp, initOrderParaAddrSize) > 0) {
+          if (stream.read(temp, initOrderParaAddrSize) > 0) {
             orderAddrList.add(_readU32(temp, 0));
           }
         }
@@ -938,14 +936,26 @@ class InitOrder {
 //=================================================================================================
 // JSON 데이터를 클래스 멤버 변수에 설정하는 함수들
 //-------------------------------------------------------------------------------------------------
-class TitleFromJson {
+class _TitleFromJson {
   //String jsonFilePath = ''; // 'assets/S300_1_00_Title.json';
-  Map<String, dynamic> jsonData = {};
-  Map<int, String> mapTitle = {};
+  Map<String, dynamic> _jsonData = {};
+  final Map<int, String> _mapTitle = {};
 
-  TitleFromJson();
+  _TitleFromJson();
 
-  Future<bool> loadAssets(String filePath) async {
+  Future<bool> load(String filePath, {bool isAssets = true}) async {
+    try {
+      if (isAssets) {
+        return await _loadAssets(filePath);
+      } else {
+        return await _loadFile(filePath);
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> _loadAssets(String filePath) async {
     //=============================================================================================
     // pubspec.yaml 파일에서 아래 처럼 assets에서 파일 위치를 정해 주어야 함.
     //---------------------------------------------------------------------------------------------
@@ -957,29 +967,34 @@ class TitleFromJson {
     //    - assets/LSIS/S300/S300_1_00_Title.json
     //---------------------------------------------------------------------------------------------
 
-    // print('TitleFromJson::loadAssets() - 파일 경로: $filePath');
+    // print('_TitleFromJson::loadAssets() - 파일 경로: $filePath');
     try {
       // assets 폴더의 파일을 읽기 위해 rootBundle 사용, 'assets/S300_1_00.json';
       final jsonString = await rootBundle.loadString(filePath);
-      jsonData = json.decode(jsonString);
+      _jsonData = json.decode(jsonString);
     } catch (e) {
-      jsonData = {};
-      print('JSON 파일 로드 중 오류 발생: $e');
+      if (kDebugMode) {
+        print('JSON 파일 로드 중 오류 발생: $e');
+      }
+      _jsonData = {};
       return false;
     }
 
     return true;
   }
 
-  Future<bool> loadFile(String filePath) async {
-    //print('TitleFromJson::loadFile() - 파일 경로: $filePath');
+  // 현재는 사용하지 않음. 모두 assets 에서 파일을 로드함.
+  Future<bool> _loadFile(String filePath) async {
+    //print('_TitleFromJson::loadFile() - 파일 경로: $filePath');
     try {
       final file = File(filePath);
       final jsonString = await file.readAsString();
-      jsonData = json.decode(jsonString);
+      _jsonData = json.decode(jsonString);
     } catch (e) {
-      jsonData = {};
-      print('JSON 파일 로드 중 오류 발생: $e');
+      if (kDebugMode) {
+        print('JSON 파일 로드 중 오류 발생: $e');
+      }
+      _jsonData = {};
       return false;
     }
 
@@ -987,24 +1002,26 @@ class TitleFromJson {
   }
 
   Map<int, String> titles() {
-    mapTitle.clear();
+    _mapTitle.clear();
     try {
-      final parser = jsonData['Titles'];
+      final parser = _jsonData['Titles'];
       if (parser != null && parser is List) {
         for (var element in parser) {
           final id = element['id'];
           final text = element['Text'];
 
-          //print('TitleFromJson::titles() - id: $id, text: $text');
+          //print('_TitleFromJson::titles() - id: $id, text: $text');
 
-          mapTitle[id] = text;
+          _mapTitle[id] = text;
         }
       }
     } catch (e) {
-      print('TitleSpec JSON 파싱 중 오류 발생: $e');
+      if (kDebugMode) {
+        print('TitleSpec JSON 파싱 중 오류 발생: $e');
+      }
     }
 
-    return mapTitle;
+    return _mapTitle;
   }
 }
 
@@ -1013,16 +1030,16 @@ class TitleFromJson {
 //-------------------------------------------------------------------------------------------------
 class SpecFromJson {
   //String jsonFilePath = ''; // 'assets/S300_1_00.json';
-  Map<String, dynamic> jsonData = {};
-  //Map<int, String> mapTitle = {};
-  //TitleFromJson titleFromJson = TitleFromJson();
-  Map<int, String>? mapTitle;
-  Map<int, String> mapUnits = {};
+  Map<String, dynamic> _jsonData = {};
+  //Map<int, String> _mapTitle = {};
+  //_TitleFromJson titleFromJson = _TitleFromJson();
+  Map<int, String>? _mapTitle;
+  final Map<int, String> _mapUnits = {};
 
   //===============================================================================================
   SpecFromJson();
   //-----------------------------------------------------------------------------------------------
-  //Map<int, String> get mapTitle => titleFromJson.mapTitle;
+  //Map<int, String> get _mapTitle => titleFromJson._mapTitle;
   String titieFileName(String filePath) {
     final index = filePath.indexOf('.json'); // 'assets/S300_1_00.json';
     if (index != -1) {
@@ -1042,6 +1059,18 @@ class SpecFromJson {
   }
 
   //-----------------------------------------------------------------------------------------------
+  Future<bool> load(String filePath, {bool isAssets = true}) async {
+    try {
+      if (isAssets) {
+        return await loadAssets(filePath);
+      } else {
+        return await _loadFile(filePath);
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<bool> loadAssets(String filePath) async {
     //=============================================================================================
     // pubspec.yaml 파일에서 아래 처럼 assets에서 파일 위치를 정해 주어야 함.
@@ -1054,12 +1083,12 @@ class SpecFromJson {
     //    - assets/LSIS/S300/S300_1_00_Title.json
     //---------------------------------------------------------------------------------------------
 
-    jsonData = {};
-    mapTitle = null;
+    _jsonData = {};
+    _mapTitle = null;
     try {
       // assets 폴더의 파일을 읽기 위해 rootBundle 사용, 'assets/S300_1_00.json';
       final jsonString = await rootBundle.loadString(filePath);
-      jsonData = json.decode(jsonString);
+      _jsonData = json.decode(jsonString);
 
       // print('SpecFromJson::loadAssetsJson() - 파일 경로: $filePath');
 
@@ -1070,35 +1099,42 @@ class SpecFromJson {
         // print('SpecFromJson::loadAssetsJson() - Title 파일 경로: $titlePath');
 
         // Title 파일 로드 시도
-        TitleFromJson titleFromJson = TitleFromJson();
-        if (await titleFromJson.loadAssets(titlePath)) {
+        _TitleFromJson titleFromJson = _TitleFromJson();
+        if (await titleFromJson.load(titlePath)) {
           //final res = titleFromJson.titles();
-          mapTitle = titleFromJson.titles();
+          _mapTitle = titleFromJson.titles();
           // print(
-          //     'SpecFromJson::loadAssetsJson() - Title 파일 로드 성공: ${titleFromJson.mapTitle.length}개 항목');
+          //     'SpecFromJson::loadAssetsJson() - Title 파일 로드 성공: ${titleFromJson._mapTitle.length}개 항목');
         } else {
-          print(
-            'SpecFromJson::loadAssetsJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath',
-          );
+          if (kDebugMode) {
+            print(
+              'SpecFromJson::loadAssetsJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath',
+            );
+          }
         }
       } else {
-        print('SpecFromJson::loadAssetsJson() - Title 파일 없음 !!! $filePath');
+        if (kDebugMode) {
+          print('SpecFromJson::loadAssetsJson() - Title 파일 없음 !!! $filePath');
+        }
       }
     } catch (e) {
-      print('JSON 파일 로드 중 오류 발생: $e');
+      if (kDebugMode) {
+        print('JSON 파일 로드 중 오류 발생: $e');
+      }
       return false;
     }
 
     return true;
   }
 
-  Future<bool> loadFile(String filePath) async {
-    jsonData = {};
-    mapTitle = null;
+  // 현재는 사용하지 않음. 모두 assets 에서 파일을 로드함.
+  Future<bool> _loadFile(String filePath) async {
+    _jsonData = {};
+    _mapTitle = null;
     try {
       final file = File(filePath);
       final jsonString = await file.readAsString();
-      jsonData = json.decode(jsonString);
+      _jsonData = json.decode(jsonString);
 
       // print('SpecFromJson::loadJson() - 파일 경로: $filePath');
 
@@ -1109,22 +1145,28 @@ class SpecFromJson {
         // print('SpecFromJson::loadJson() - Title 파일 경로: $titlePath');
 
         // Title 파일 로드 시도
-        TitleFromJson titleFromJson = TitleFromJson();
-        if (await titleFromJson.loadFile(titlePath)) {
+        _TitleFromJson titleFromJson = _TitleFromJson();
+        if (await titleFromJson.load(titlePath, isAssets: false)) {
           //final res = titleFromJson.titles();
-          mapTitle = titleFromJson.titles();
+          _mapTitle = titleFromJson.titles();
           // print(
-          //     'SpecFromJson::loadJson() - Title 파일 로드 성공: ${titleFromJson.mapTitle.length}개 항목');
+          //     'SpecFromJson::loadJson() - Title 파일 로드 성공: ${titleFromJson._mapTitle.length}개 항목');
         } else {
-          print(
-            'SpecFromJson::loadJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath',
-          );
+          if (kDebugMode) {
+            print(
+              'SpecFromJson::loadJson() - Title 파일 로드 실패 또는 파일 없음 !!! $titlePath',
+            );
+          }
         }
       } else {
-        print('SpecFromJson::loadJson() - Title 파일 없음 !!! $filePath');
+        if (kDebugMode) {
+          print('SpecFromJson::loadJson() - Title 파일 없음 !!! $filePath');
+        }
       }
     } catch (e) {
-      print('JSON 파일 로드 중 오류 발생: $e');
+      if (kDebugMode) {
+        print('JSON 파일 로드 중 오류 발생: $e');
+      }
       return false;
     }
 
@@ -1136,9 +1178,9 @@ class SpecFromJson {
     Map<String, dynamic> result = {};
     try {
       //final DeviceSpec spec = DeviceSpec(null);
-      final parser = jsonData['Device'];
+      final parser = _jsonData['Device'];
       if (parser == null) {
-        throw 'parse error: deviceSpec()';
+        throw 'parse error: LoadSpecTrips';
       }
 
       spec.strDataFileVer = parser['DataFileVersion'] ?? '';
@@ -1218,9 +1260,9 @@ class SpecFromJson {
     Map<String, dynamic> result = {};
     try {
       //final IoSpec spec = IoSpec(null);
-      final parser = jsonData['IO'];
+      final parser = _jsonData['IO'];
       if (parser == null) {
-        throw 'parse error: ioSpec()';
+        throw 'parse error: LoadSpecTrips';
       }
 
       spec.inputTermInfoList.clear();
@@ -1239,7 +1281,7 @@ class SpecFromJson {
           'pMsgInfo': msgSpec.msgInfoList,
         };
       } else {
-        msgRes = messageFromJson();
+        msgRes = _MessageFromJson();
       }
 
       // Input 데이터 처리
@@ -1248,8 +1290,9 @@ class SpecFromJson {
         spec.nNormalInput = inputData['TotalNumOfBasic'] ?? 0;
         spec.nTotalInput = spec.nNormalInput + nTotalNumOfExt;
         spec.nTotalInputFuncTitle = 0; // ???
-        spec.nAddInputStatus =
-            _parseHexAddress(inputData['StatusCommAddr'] ?? '0');
+        spec.nAddInputStatus = _parseHexAddress(
+          inputData['StatusCommAddr'] ?? '0',
+        );
 
         // inputTermInfoList 설정
         final termInfoData = inputData['BasicTerminalInfo'];
@@ -1260,8 +1303,10 @@ class SpecFromJson {
             final info = termInfoData[nCnt];
             Map<String, dynamic> map = {
               'strName': makeTitleWithAtValue(
-                  mapTitleName(info['Title::id']), info['AtValue'] ?? ''),
-              'nCommAddr': _parseHexAddress(info['CommAddr'] ?? '0')
+                _MapTitleName(info['Title::id']),
+                info['AtValue'] ?? '',
+              ),
+              'nCommAddr': _parseHexAddress(info['CommAddr'] ?? '0'),
             };
             spec.inputTermInfoList.add(map);
           }
@@ -1275,8 +1320,10 @@ class SpecFromJson {
             final info = extTerminalInfo[nCnt];
             Map<String, dynamic> map = {
               'strName': makeTitleWithAtValue(
-                  mapTitleName(info['Title::id']), info['AtValue'] ?? ''),
-              'nCommAddr': _parseHexAddress(info['CommAddr'] ?? '0')
+                _MapTitleName(info['Title::id']),
+                info['AtValue'] ?? '',
+              ),
+              'nCommAddr': _parseHexAddress(info['CommAddr'] ?? '0'),
             };
             spec.inputTermInfoList.add(map);
           }
@@ -1302,8 +1349,9 @@ class SpecFromJson {
         spec.nNormalOutput = outputData['TotalNumOfBasic'] ?? 0;
         spec.nTotalOutput = spec.nNormalOutput + nTotalNumOfExt;
         spec.nTotalOutputFuncTitle = 0; // ???
-        spec.nAddOutputStatus =
-            _parseHexAddress(outputData['StatusCommAddr'] ?? '0');
+        spec.nAddOutputStatus = _parseHexAddress(
+          outputData['StatusCommAddr'] ?? '0',
+        );
 
         // outputTermInfoList 설정
         spec.outputTermInfoList.clear();
@@ -1315,8 +1363,10 @@ class SpecFromJson {
             final info = termInfoData[nCnt];
             Map<String, dynamic> map = {
               'strName': makeTitleWithAtValue(
-                  mapTitleName(info['Title::id']), info['AtValue'] ?? ''),
-              'nCommAddr': _parseHexAddress(info['CommAddr'] ?? '0')
+                _MapTitleName(info['Title::id']),
+                info['AtValue'] ?? '',
+              ),
+              'nCommAddr': _parseHexAddress(info['CommAddr'] ?? '0'),
             };
             spec.outputTermInfoList.add(map);
           }
@@ -1330,8 +1380,10 @@ class SpecFromJson {
             final info = extTerminalInfo[nCnt];
             Map<String, dynamic> map = {
               'strName': makeTitleWithAtValue(
-                  mapTitleName(info['Title::id']), info['AtValue'] ?? ''),
-              'nCommAddr': _parseHexAddress(info['CommAddr'] ?? '0')
+                _MapTitleName(info['Title::id']),
+                info['AtValue'] ?? '',
+              ),
+              'nCommAddr': _parseHexAddress(info['CommAddr'] ?? '0'),
             };
             spec.outputTermInfoList.add(map);
           }
@@ -1390,13 +1442,13 @@ class SpecFromJson {
     try {
       // LoadSpecTrips
       //final TripSpec spec = TripSpec(null);
-      final parser = jsonData['Trips'];
+      final parser = _jsonData['Trips'];
       if (parser == null) {
-        throw 'parse error: tripSpec()';
+        throw 'parse error: LoadSpecTrips';
       }
 
       Map<String, dynamic> msgRes = {};
-      Map<int, String> units = unitsFromJson();
+      Map<int, String> units = _UnitsFromJson();
 
       // LoadSpecTripInfo
       final statusInfo = parser['StatusInfo'];
@@ -1413,7 +1465,7 @@ class SpecFromJson {
           final msgId = info['Message::id'];
           if (msgId != null && msgId is int) {
             if (msgRes.isEmpty) {
-              msgRes = msgFromMsg(msgSpec);
+              msgRes = _MsgFromMsg(msgSpec);
             }
             if (msgRes.isNotEmpty) {
               pMessage = msgRes['pMsgInfo'][msgId]['pTitle'][0]; //.at(0);
@@ -1432,11 +1484,13 @@ class SpecFromJson {
           Map<String, dynamic> map = {
             'nID': info['id'],
             'strName': makeTitleWithAtValue(
-                mapTitleName(info['Title::id']), info['AtValue'] ?? ''),
+              _MapTitleName(info['Title::id']),
+              info['AtValue'] ?? '',
+            ),
             'nDataType': info['DataType'],
             'nPoint': info['Point16'],
             'pMessage': pMessage,
-            'strUnit': strUnit
+            'strUnit': strUnit,
           };
           statusInfoHash.add(map);
         }
@@ -1447,8 +1501,9 @@ class SpecFromJson {
       if (currentTrip == null) {
         throw 'parse error: LoadSpecTripCurTrip';
       }
-      spec.nFirstTripNameAddr =
-          _parseHexAddress(currentTrip['FirstTripAddr'] ?? '0');
+      spec.nFirstTripNameAddr = _parseHexAddress(
+        currentTrip['FirstTripAddr'] ?? '0',
+      );
 
       spec.tripAddrList.clear();
       final tripAddrs = currentTrip['TripAddr'];
@@ -1482,7 +1537,7 @@ class SpecFromJson {
                 'strName': info['strName'],
                 'nDataType': info['nDataType'],
                 'nPointMsg': info['nPoint'],
-                'strUnit': info['strUnit']
+                'strUnit': info['strUnit'],
               };
               spec.tripInfoDataList.add(map);
             }
@@ -1517,8 +1572,9 @@ class SpecFromJson {
         throw 'parse error: LoadSpecTripCurWarn';
       }
 
-      spec.nFirstWarnNameAddr =
-          _parseHexAddress(currentWarning['FirstWarnAddr'] ?? '0');
+      spec.nFirstWarnNameAddr = _parseHexAddress(
+        currentWarning['FirstWarnAddr'] ?? '0',
+      );
 
       spec.warnAddrList.clear();
       final warnAddrs = currentWarning['WarnAddr'];
@@ -1552,7 +1608,7 @@ class SpecFromJson {
                 'strName': info['strName'],
                 'nDataType': info['nDataType'],
                 'nPointMsg': info['nPoint'],
-                'strUnit': info['strUnit']
+                'strUnit': info['strUnit'],
               };
               spec.warnInfoDataList.add(map);
             }
@@ -1627,7 +1683,7 @@ class SpecFromJson {
 
   //-----------------------------------------------------------------------------------------------
   Map<String, dynamic> messageSpec(MsgSpec spec) {
-    Map<String, dynamic> result = messageFromJson();
+    Map<String, dynamic> result = _MessageFromJson();
     if (result.isNotEmpty) {
       spec.nTotalMsg = result['nTotalMsg'];
       spec.msgInfoList.addAll(result['pMsgInfo']);
@@ -1647,15 +1703,15 @@ class SpecFromJson {
     Map<String, dynamic> result = {};
     try {
       //final CommonSpec spec = CommonSpec(null);
-      final parser = jsonData['CommonParameters'];
+      final parser = _jsonData['CommonParameters'];
       if (parser == null) {
-        throw 'parse error: commonSpec()';
+        throw 'parse error: LoadSpecTrips';
       }
 
       spec.commonInfoList.clear();
       spec.nTotCommonNo = parser.length;
 
-      Map<int, String> units = unitsFromJson();
+      Map<int, String> units = _UnitsFromJson();
 
       for (var element in parser) {
         int nPointMsg = element['Point32'] ?? 0;
@@ -1667,14 +1723,16 @@ class SpecFromJson {
           'nCodeNum': element['CodeNum'],
           'nCommAddr': _parseHexAddress(element['CommAddr']),
           'strName': makeTitleWithAtValue(
-              mapTitle?[element['Title::id']] ?? '', element['AtValue'] ?? ''),
+            _mapTitle?[element['Title::id']] ?? '',
+            element['AtValue'] ?? '',
+          ),
           'nDefault': element['Def'],
           'nMax': element['Max'],
           'nMin': element['Min'],
           'nDataType': element['DataType'],
           'nPointMsg': nPointMsg,
           'strUnit': units[element['Unit::id']] ?? '',
-          'nAttribute': _parseHexAddress(element['Attr'])
+          'nAttribute': _parseHexAddress(element['Attr']),
         };
         spec.commonInfoList.add(map);
       }
@@ -1698,9 +1756,9 @@ class SpecFromJson {
     Map<String, dynamic> result = {};
     try {
       //final ParameterSpec spec = ParameterSpec(null);
-      final parser = jsonData['ParameterGroups'];
+      final parser = _jsonData['ParameterGroups'];
       if (parser == null) {
-        throw 'parse error: parameterSpec()';
+        throw 'parse error: LoadSpecTrips';
       }
 
       spec.parmGrpList.clear();
@@ -1708,13 +1766,15 @@ class SpecFromJson {
 
       int nTotParm = 0;
       Map<String, dynamic> paramMap = {};
-      Map<int, String> units = unitsFromJson();
+      Map<int, String> units = _UnitsFromJson();
 
       for (var group in parser) {
         Map<String, dynamic> paramMap = {
           'nGrpNum': group['GroupNum'],
-          'strGrpName':
-              (mapTitle?[group['Title::id']] ?? '').replaceAll(' Group', ''),
+          'strGrpName': (_mapTitle?[group['Title::id']] ?? '').replaceAll(
+            ' Group',
+            '',
+          ),
           'nAttribute': _parseHexAddress(group['GroupAttr']),
           'nTotParm': group['Parameters'].length,
         };
@@ -1730,18 +1790,20 @@ class SpecFromJson {
             Map<String, dynamic> typeMap = {
               'nCodeNum': element['CodeNum'],
               'strNameHz': makeTitleWithAtValue(
-                  mapTitle?[element['Title::id']] ?? '',
-                  element['AtValue'] ?? ''),
+                _mapTitle?[element['Title::id']] ?? '',
+                element['AtValue'] ?? '',
+              ),
               'strNameRpm': makeTitleWithAtValue(
-                  mapTitle?[element['Title::id']] ?? '',
-                  element['AtValue'] ?? ''),
+                _mapTitle?[element['Title::id']] ?? '',
+                element['AtValue'] ?? '',
+              ),
               'nDefault': element['Def'],
               'nMax': element['Max'],
               'nMin': element['Min'],
               'nDataType': element['DataType'],
               'nPointMsg': nPointMsg,
               'strUnit': units[element['Unit::id']] ?? '',
-              'nAttribute': _parseHexAddress(element['Attr'])
+              'nAttribute': _parseHexAddress(element['Attr']),
             };
             parmTypeList.add(typeMap);
           }
@@ -1749,10 +1811,7 @@ class SpecFromJson {
         spec.parmGrpList.add({'GrpInfo': paramMap, 'pParmType': parmTypeList});
       }
       spec.nTotGroup = spec.parmGrpList.length;
-      result = {
-        'nTotGroup': spec.nTotGroup,
-        'pParmGrp': spec.parmGrpList,
-      };
+      result = {'nTotGroup': spec.nTotGroup, 'pParmGrp': spec.parmGrpList};
     } catch (e) {
       print('ParameterSpec JSON 파싱 중 오류 발생: $e');
       return result;
@@ -1769,9 +1828,9 @@ class SpecFromJson {
     Map<String, dynamic> result = {};
     try {
       //final InitOrder spec = InitOrder(null);
-      final parser = jsonData['InitOrder'];
+      final parser = _jsonData['InitOrder'];
       if (parser == null) {
-        throw 'parse error: initOrder()';
+        throw 'parse error: LoadSpecTrips';
       }
     } catch (e) {
       print('InitOrder JSON 파싱 중 오류 발생: $e');
@@ -1781,39 +1840,42 @@ class SpecFromJson {
   }
 
   //===============================================================================================
-  Map<int, String> unitsFromJson() {
-    mapUnits.clear();
+  // private:
+  Map<int, String> _UnitsFromJson() {
+    _mapUnits.clear();
     try {
-      final parser = jsonData['Units'];
+      final parser = _jsonData['Units'];
       if (parser != null && parser is List) {
         for (var element in parser) {
           final id = element['id'];
           final text = element['Text'];
 
           if (id != null && text != null) {
-            mapUnits[id] = text.toString();
+            _mapUnits[id] = text.toString();
           }
         }
       }
     } catch (e) {
-      print('unitsFromJson JSON 파싱 중 오류 발생: $e');
+      if (kDebugMode) {
+        print('_UnitsFromJson JSON 파싱 중 오류 발생: $e');
+      }
     }
 
-    return mapUnits;
+    return _mapUnits;
   }
 
-  String mapTitleName(int id) {
-    if (mapTitle != null) {
-      return mapTitle![id] ?? '';
+  String _MapTitleName(int id) {
+    if (_mapTitle != null) {
+      return _mapTitle![id] ?? '';
     }
     return '';
   }
 
-  Map<String, dynamic> messageFromJson() {
+  Map<String, dynamic> _MessageFromJson() {
     Map<String, dynamic> result = {};
 
     try {
-      final parser = jsonData['Messages'];
+      final parser = _jsonData['Messages'];
       if (parser == null) {
         throw 'parse error: LoadSpecTrips';
       }
@@ -1832,8 +1894,12 @@ class SpecFromJson {
 
             for (var title in titleinfo) {
               if (title is Map<String, dynamic>) {
-                msgTitleList.add(makeTitleWithAtValue(
-                    mapTitleName(title['Title::id']), title['AtValue'] ?? ''));
+                msgTitleList.add(
+                  makeTitleWithAtValue(
+                    _MapTitleName(title['Title::id']),
+                    title['AtValue'] ?? '',
+                  ),
+                );
               }
             }
 
@@ -1850,14 +1916,16 @@ class SpecFromJson {
         result = {'nTotalMsg': nTotalMsg, 'pMsgInfo': msgInfoList};
       }
     } catch (e) {
-      print('MessageSpec JSON 파싱 중 오류 발생: $e');
+      if (kDebugMode) {
+        print('MessageSpec JSON 파싱 중 오류 발생: $e');
+      }
       return result;
     }
 
     return result;
   }
 
-  Map<String, dynamic> msgFromMsg(MsgSpec? msgSpec) {
+  Map<String, dynamic> _MsgFromMsg(MsgSpec? msgSpec) {
     Map<String, dynamic> result = {};
     if (msgSpec != null) {
       result = {
@@ -1865,10 +1933,11 @@ class SpecFromJson {
         'pMsgInfo': msgSpec.msgInfoList,
       };
     } else {
-      result = messageFromJson();
+      result = _MessageFromJson();
     }
     return result;
   }
+
   //===============================================================================================
 }
 

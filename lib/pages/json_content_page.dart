@@ -31,7 +31,7 @@ class _JsonContentPageState extends State<JsonContentPage> {
       final specFromJson = SpecFromJson();
       bool loaded = false;
       if (Platform.isWindows) {
-        loaded = await specFromJson.loadFile(widget.filePath);
+        loaded = await specFromJson.load(widget.filePath, isAssets: false);
       } else {
         loaded = await specFromJson.loadAssets(widget.filePath);
       }

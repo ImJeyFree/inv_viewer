@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inv_viewer/pages/file_content_page.dart';
-import 'package:inv_viewer/pages/pole.dart';
+import 'package:inv_viewer/pages/poleEx.dart';
 
 final filename = 'G100_1_30.INV';
 
@@ -100,17 +100,23 @@ class MockStorage extends Storage {
 void main() {
   group('FileContentPage Widget :', () {
     testWidgets('로딩 인디케이터가 정상 표시', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: FileContentPage(fileName: filename), //'test.inv'),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FileContentPage(fileName: filename), //'test.inv'),
+        ),
+      );
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
     testWidgets('리스트로 보기 - 각 Spec 텍스트 정상 표시', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: FileContentPage(
-            fileName: filename, storage: MockStorage()), // MockStorage 주입
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FileContentPage(
+            fileName: filename,
+            storage: MockStorage(),
+          ), // MockStorage 주입
+        ),
+      );
 
       bool found = false;
       for (int i = 0; i < 20; i++) {
@@ -142,19 +148,26 @@ void main() {
 
       print(' 리스트로 보기');
       print(
-          ' - Device Spec : ${deviceSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Device Spec : ${deviceSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - IO Spec : ${ioSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - IO Spec : ${ioSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Trip Spec: ${tripSpecSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Trip Spec: ${tripSpecSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Message Spec : ${msgSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Message Spec : ${msgSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Common Spec : ${commonSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Common Spec : ${commonSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Parameter Spec : ${parameterSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Parameter Spec : ${parameterSpecFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Init Order : ${initOrderFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Init Order : ${initOrderFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
 
       expect(deviceSpecFinder, findsOneWidget);
       expect(ioSpecFinder, findsOneWidget);
@@ -166,10 +179,14 @@ void main() {
     });
 
     testWidgets('표로 보기 - 각 Spec 탭 정상 표시', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: FileContentPage(
-            fileName: filename, storage: MockStorage()), // MockStorage 주입
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FileContentPage(
+            fileName: filename,
+            storage: MockStorage(),
+          ), // MockStorage 주입
+        ),
+      );
 
       // 표 보기 버튼이 나타날 때까지 대기
       bool found = false;
@@ -197,19 +214,26 @@ void main() {
 
       print(' 표로 보기');
       print(
-          ' - Device Spec : ${deviceSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Device Spec : ${deviceSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - IO Spec : ${ioSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - IO Spec : ${ioSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Trip Spec : ${tripSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Trip Spec : ${tripSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Message Spec : ${msgSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Message Spec : ${msgSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Common Spec : ${commonSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Common Spec : ${commonSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Parameter Spec : ${parameterSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Parameter Spec : ${parameterSpecTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
       print(
-          ' - Init Order : ${initOrderTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}');
+        ' - Init Order : ${initOrderTabFinder.evaluate().isNotEmpty ? 'OK' : 'Failed'}',
+      );
 
       expect(deviceSpecTabFinder, findsWidgets);
       expect(ioSpecTabFinder, findsWidgets);

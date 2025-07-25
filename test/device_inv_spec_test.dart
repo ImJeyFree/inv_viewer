@@ -1,23 +1,26 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inv_viewer/pages/device_inv.dart';
-import 'package:inv_viewer/pages/pole.dart';
+import 'package:inv_viewer/pages/poleEx.dart';
 import 'dart:io';
 
 // 실행: flutter test test/device_inv_spec_test.dart
 
 void main([List<String>? args]) {
   // 커맨드라인 인자에서 파일명 추출, 없으면 기본값 사용
-  final fileName =
-      (args != null && args.isNotEmpty)
-          ? args.first
-          : (Platform.environment['INV_FILE'] ??
-              'assets/DataFile/LSIS/G100/G100_1_30.INV');
+  final fileName = (args != null && args.isNotEmpty)
+      ? args.first
+      : (Platform.environment['INV_FILE'] ??
+          //'G100_1_30.INV'
+          //'C:\\workspace\\flutter\\inv_viewer\\test\\G100_1_30.INV'
+          'assets/DataFile/LSIS/G100/G100_1_30.INV');
 
   group('$fileName Parse :', () {
     late Storage storage;
 
     setUp(() async {
+      //fileName = 'assets/DataFile/LSIS/G100/G100_1_30.INV';
       storage = Storage(fileName: fileName);
+      //storage = Storage(fileName: fileName, isAssets: true);
       await storage.open();
     });
 
